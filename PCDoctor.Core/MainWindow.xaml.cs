@@ -4,9 +4,6 @@ using PCDoctor.Core.Monitoring;
 
 namespace PCDoctor.Core
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         
@@ -28,14 +25,20 @@ namespace PCDoctor.Core
                 Dispatcher.Invoke(() =>
                     {
                         CpuUsageText.Text = $"{stats.CpuUsage:F1}%";
+                        CpuProgressBar.Value = stats.CpuUsage;
+                        
+                        MemoryUsageText.Text = $"{stats.UsedMemoryMB} MB / {stats.TotalMemoryMB:F1} MB";
 
-                        MemoryUsageText.Text = $"{stats.UsedMemoryMB} MB / {stats.TotalMemoryMB:F0} MB";
+                        MemoryProgressBar.Value =
+                            stats.TotalMemoryMB > 0
+                                ? stats.UsedMemoryMB / stats.TotalMemoryMB * 100
+                                : 0;
                         
                         DiskListBox.Items.Clear();
 
                         foreach (DiskStats disk in stats.Disks)
                         {
-                            DiskListBox.Items.Add($"{disk.DriveName} {disk.UsedSpaceGB:F1} GB / {disk.TotalSpaceGB} GB ({disk.UsagePercentage:F1}%");
+                            DiskListBox.Items.Add($"{disk.DriveName} {disk.UsedSpaceGB:F1} GB / {disk.TotalSpaceGB:F1} GB ({disk.UsagePercentage:F1}%)");
                         }
                     }
                 );

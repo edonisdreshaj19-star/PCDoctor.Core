@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Services\" />
+    <ProjectReference Include="..\PCDoctor.Core\PCDoctor.Core.csproj" />
   </ItemGroup>
 
 </Project>

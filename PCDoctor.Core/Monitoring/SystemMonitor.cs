@@ -1,8 +1,8 @@
-﻿using PCDoctor.Core.Models;
+﻿using PCDoctor.Models;
 
 namespace PCDoctor.Core.Monitoring
 {
-    class SystemMonitor
+    public class SystemMonitor
     {
         private readonly CpuMonitor cpuCounter;
         private readonly MemoryMonitor memoryMonitor;

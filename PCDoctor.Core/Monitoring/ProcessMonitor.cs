@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
-using PCDoctor.Core.Models;
+using PCDoctor.UI.Models;
 
-namespace PCDoctor.Core;
+namespace PCDoctor.Core.Monitoring;
 
 public class ProcessMonitor
 {

@@ -1,5 +1,4 @@
-﻿using System.IO;
-using PCDoctor.Core.Models;
+﻿using PCDoctor.UI.Models;
 
 namespace PCDoctor.Core.Monitoring;
 

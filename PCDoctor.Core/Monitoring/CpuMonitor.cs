@@ -1,6 +1,5 @@
-﻿using System.Diagnostics;
-
-namespace PCDoctor.Core.Monitoring;
+﻿namespace PCDoctor.Core.Monitoring;
+using System.Diagnostics;
 
 public class CpuMonitor
 {

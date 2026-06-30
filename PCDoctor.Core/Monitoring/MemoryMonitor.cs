@@ -19,10 +19,10 @@ public class MemoryMonitor
         return (-1, -1);
     }
     
-    [DllImport("kernel32.dll")]
+    [DllImport("kernel32.dll", SetLastError =  true)]
     private static extern bool GlobalMemoryStatusEx([In, Out] MEMORYSTATUSEX lpBuffer);
 
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential)] 
     private class MEMORYSTATUSEX
     {
         public uint dwLength;
@@ -33,6 +33,7 @@ public class MemoryMonitor
         public ulong ullAvailPageFile;
         public ulong ullTotalVirtual;
         public ulong ullAvailVirtual;
+        public ulong ullAvailExtendedVirtual;
 
         public MEMORYSTATUSEX()
         {

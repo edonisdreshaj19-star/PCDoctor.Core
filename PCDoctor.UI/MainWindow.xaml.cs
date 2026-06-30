@@ -1,8 +1,9 @@
 ﻿using System.Windows;
-using PCDoctor.Core.Models;
 using PCDoctor.Core.Monitoring;
+using PCDoctor.Models;
+using PCDoctor.UI.Models;
 
-namespace PCDoctor.Core
+namespace PCDoctor.UI
 {
     public partial class MainWindow : Window
     {
@@ -27,7 +28,7 @@ namespace PCDoctor.Core
                         CpuUsageText.Text = $"{stats.CpuUsage:F1}%";
                         CpuProgressBar.Value = stats.CpuUsage;
                         
-                        MemoryUsageText.Text = $"{stats.UsedMemoryMB} MB / {stats.TotalMemoryMB:F1} MB";
+                        MemoryUsageText.Text = $"{stats.UsedMemoryMB / 1024:F2} GB / {stats.TotalMemoryMB / 1024:F2} GB";
 
                         MemoryProgressBar.Value =
                             stats.TotalMemoryMB > 0

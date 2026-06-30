@@ -1,4 +1,4 @@
-﻿namespace PCDoctor.Core.Models;
+﻿namespace PCDoctor.UI.Models;
 
 public class DiskStats
 {

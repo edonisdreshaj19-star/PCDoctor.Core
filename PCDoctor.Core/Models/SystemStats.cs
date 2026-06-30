@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using PCDoctor.UI.Models;
 
-namespace PCDoctor.Core.Models
+namespace PCDoctor.Models
 {
     public class SystemStats
     {

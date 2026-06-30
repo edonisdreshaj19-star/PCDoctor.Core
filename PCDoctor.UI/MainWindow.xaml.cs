@@ -11,6 +11,7 @@ namespace PCDoctor.UI
         
         private readonly SystemMonitor monitor;
         private readonly ApiService apiService;
+        private DateTime lastApiSendTime = DateTime.MinValue;
         public MainWindow()
         {
             InitializeComponent();
@@ -26,8 +27,13 @@ namespace PCDoctor.UI
             while (true)
             {
                 SystemStats stats = monitor.GetStats();
-                
-                await apiService.SendSystemStatsAsync(stats);
+
+                if ((DateTime.Now - lastApiSendTime).TotalSeconds >= 10)
+                {
+                    await apiService.SendSystemStatsAsync(stats);
+                    lastApiSendTime = DateTime.Now;
+                }
+
                 
                 Dispatcher.Invoke(() =>
                     {

@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using PCDoctor.Core.Monitoring;
+using PCDoctor.Core.Services;
 using PCDoctor.Models;
 using PCDoctor.UI.Models;
 
@@ -9,11 +10,14 @@ namespace PCDoctor.UI
     {
         
         private readonly SystemMonitor monitor;
+        private readonly ApiService apiService;
         public MainWindow()
         {
             InitializeComponent();
             
             monitor = new SystemMonitor();
+            apiService = new ApiService();
+            
             StartMonitoring();
         }
 
@@ -22,7 +26,9 @@ namespace PCDoctor.UI
             while (true)
             {
                 SystemStats stats = monitor.GetStats();
-
+                
+                await apiService.SendSystemStatsAsync(stats);
+                
                 Dispatcher.Invoke(() =>
                     {
                         CpuUsageText.Text = $"{stats.CpuUsage:F1}%";
@@ -51,6 +57,7 @@ namespace PCDoctor.UI
                             );
                         }
                     }
+                    
                 );
                 await Task.Delay(1000);
             }

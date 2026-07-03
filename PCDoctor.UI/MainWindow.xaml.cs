@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using PCDoctor.Core.Models;
 using PCDoctor.Core.Monitoring;
 using PCDoctor.Core.Services;
 using PCDoctor.Models;
@@ -33,6 +34,8 @@ namespace PCDoctor.UI
                     await apiService.SendSystemStatsAsync(stats);
                     lastApiSendTime = DateTime.Now;
                 }
+                
+                List<SystemStatsHistoryDto> history = await apiService.GetHistoryAsync();
 
                 
                 Dispatcher.Invoke(() =>

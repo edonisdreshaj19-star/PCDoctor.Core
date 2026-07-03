@@ -3,6 +3,8 @@ using System;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using PCDoctor.Core.Models;
 
 namespace PCDoctor.Core.Services;
 
@@ -38,6 +40,23 @@ public class ApiService
         {
             Console.WriteLine(e);
             throw; 
+        }
+    }
+    
+    public async Task<List<SystemStatsHistoryDto>> GetHistoryAsync()
+    {
+        try
+        {
+            List<SystemStatsHistoryDto>? history =
+                await httpClient.GetFromJsonAsync<List<SystemStatsHistoryDto>>(
+                    "/api/system-stats/history"
+                );
+
+            return history ?? new List<SystemStatsHistoryDto>();
+        }
+        catch
+        {
+            return new List<SystemStatsHistoryDto>();
         }
     }
 }

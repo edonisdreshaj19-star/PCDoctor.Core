@@ -49,16 +49,30 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <StackPanel>
-            <TextBlock Text="PCDoctor"
-                       FontSize="36"
-                       FontWeight="Bold"/>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
 
-            <TextBlock Text="System Monitoring &amp; Diagnostics"
-                       FontSize="15"
-                       Foreground="#8F9BB8"
-                       Margin="0,4,0,0"/>
-        </StackPanel>
+            <StackPanel>
+                <TextBlock Text="PCDoctor"
+                           FontSize="36"
+                           FontWeight="Bold"/>
+
+                <TextBlock Text="System Monitoring &amp; Diagnostics"
+                           FontSize="15"
+                           Foreground="#8F9BB8"
+                           Margin="0,4,0,0"/>
+            </StackPanel>
+
+            <Button Grid.Column="1"
+                    Content="Settings"
+                    Width="110"
+                    Height="36"
+                    Margin="0,8,10,0"
+                    Click="SettingsButton_Click"/>
+        </Grid>
 
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>

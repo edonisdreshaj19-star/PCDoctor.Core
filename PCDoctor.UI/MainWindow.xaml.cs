@@ -19,7 +19,9 @@ public partial class MainWindow : Window
     private readonly SystemMonitor monitor;
     private readonly ApiService apiService;
     private readonly ObservableCollection<ObservablePoint> cpuPoints = new();
-
+    private readonly SettingsService settingsService;
+    
+    
     private DateTime lastApiSendTime = DateTime.MinValue;
 
     public ISeries[] CpuSeries { get; set; }
@@ -28,11 +30,11 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         
-        SettingsService settingsService = new();
+        settingsService = new SettingsService();
         settings = settingsService.LoadSettings();
 
         monitor = new SystemMonitor();
-        apiService = new ApiService();
+        apiService = new ApiService(settings);
 
         InitializeChart();
         DataContext = this;
@@ -169,5 +171,15 @@ public partial class MainWindow : Window
                 $"{diagnostic.Level}: {diagnostic.Message}"
             );
         }
+    }
+    
+    private void SettingsButton_Click(object sender, RoutedEventArgs e)
+    {
+        SettingsWindow settingsWindow = new(settings, settingsService)
+        {
+            Owner = this
+        };
+
+        settingsWindow.ShowDialog();
     }
 }

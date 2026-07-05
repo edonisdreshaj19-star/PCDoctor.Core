@@ -8,12 +8,14 @@ namespace PCDoctor.Core.Services;
 public class ApiService
 {
     private readonly HttpClient httpClient;
+    private readonly AppSettings settings;
 
-    public ApiService()
+    public ApiService(AppSettings settings)
     {
+        this.settings = settings;
         httpClient = new HttpClient
         {
-            BaseAddress = new Uri("http://localhost:8080")
+            BaseAddress = new Uri(settings.ApiBaseUrl)
         };
     }
 

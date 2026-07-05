@@ -20,7 +20,7 @@ public class SettingsService
         return JsonSerializer.Deserialize<AppSettings>(json) ?? new AppSettings();
     }
 
-    private void SaveSettings(AppSettings settings)
+    public void SaveSettings(AppSettings settings)
     {
         string json = JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true });
         File.WriteAllText(SettingsFileName, json);

@@ -12,4 +12,8 @@
     <ProjectReference Include="..\PCDoctor.Core\PCDoctor.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.1.0-dev-798" />
+  </ItemGroup>
+
 </Project>

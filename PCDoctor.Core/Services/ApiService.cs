@@ -36,7 +36,6 @@ public class ApiService
         catch (Exception e)
         {
             Console.WriteLine(e);
-            throw; 
         }
     }
     

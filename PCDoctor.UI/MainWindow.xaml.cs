@@ -8,27 +8,25 @@ using PCDoctor.Core.Monitoring;
 using PCDoctor.Core.Services;
 using PCDoctor.Models;
 using PCDoctor.UI.Models;
+using PCDoctor.UI.ViewModels;
 
 namespace PCDoctor.UI;
 
 public partial class MainWindow : Window
 {
-    private const int MaxCpuChartPoints = 30;
-
     private readonly AppSettings settings;
     private readonly SystemMonitor monitor;
     private readonly ApiService apiService;
-    private readonly ObservableCollection<ObservablePoint> cpuPoints = new();
     private readonly SettingsService settingsService;
+    private readonly MainViewModel viewModel;
     
     
     private DateTime lastApiSendTime = DateTime.MinValue;
 
-    public ISeries[] CpuSeries { get; set; }
-
     public MainWindow()
     {
         InitializeComponent();
+        
         
         settingsService = new SettingsService();
         settings = settingsService.LoadSettings();
@@ -36,23 +34,10 @@ public partial class MainWindow : Window
         monitor = new SystemMonitor();
         apiService = new ApiService(settings);
 
-        InitializeChart();
-        DataContext = this;
-
+        viewModel = new MainViewModel();
+        DataContext = viewModel;
+        
         StartMonitoring();
-    }
-
-    private void InitializeChart()
-    {
-        CpuSeries =
-        [
-            new LineSeries<ObservablePoint>
-            {
-                Values = cpuPoints,
-                Name = "CPU %",
-                GeometrySize = 4
-            }
-        ];
     }
 
     private async void StartMonitoring()
@@ -95,16 +80,16 @@ public partial class MainWindow : Window
 
     private void UpdateCpu(SystemStats stats)
     {
-        CpuUsageText.Text = $"{stats.CpuUsage:F1}%";
-        CpuProgressBar.Value = stats.CpuUsage;
+        viewModel.CpuUsageText = $"{stats.CpuUsage:F1}%";
+        viewModel.CpuProgressValue = stats.CpuUsage;
     }
 
     private void UpdateMemory(SystemStats stats)
     {
-        MemoryUsageText.Text =
+        viewModel.MemoryUsageText =
             $"{stats.UsedMemoryMB / 1024:F2} GB / {stats.TotalMemoryMB / 1024:F2} GB";
 
-        MemoryProgressBar.Value =
+        viewModel.MemoryProgressValue =
             stats.TotalMemoryMB > 0
                 ? stats.UsedMemoryMB / stats.TotalMemoryMB * 100
                 : 0;
@@ -112,11 +97,11 @@ public partial class MainWindow : Window
 
     private void UpdateDisks(SystemStats stats)
     {
-        DiskListBox.Items.Clear();
+        viewModel.DiskItems.Clear();
 
         foreach (DiskStats disk in stats.Disks)
         {
-            DiskListBox.Items.Add(
+            viewModel.DiskItems.Add(
                 $"{disk.DriveName} {disk.UsedSpaceGB:F1} GB / {disk.TotalSpaceGB:F1} GB ({disk.UsagePercentage:F1}%)"
             );
         }
@@ -124,11 +109,11 @@ public partial class MainWindow : Window
 
     private void UpdateProcesses(SystemStats stats)
     {
-        ProcessListBox.Items.Clear();
+        viewModel.ProcessItems.Clear();
 
         foreach (ProcessStats process in stats.TopProcesses)
         {
-            ProcessListBox.Items.Add(
+            viewModel.ProcessItems.Add(
                 $"{process.ProcessName} ({process.ProcessId}) - {process.MemoryUsageMB:F1} MB"
             );
         }
@@ -136,7 +121,7 @@ public partial class MainWindow : Window
 
     private void UpdateHistory(List<SystemStatsHistoryDto> history)
     {
-        HistoryListBox.Items.Clear();
+        viewModel.HistoryItems.Clear();
 
         foreach (SystemStatsHistoryDto item in history.Take(10))
         {
@@ -145,7 +130,7 @@ public partial class MainWindow : Window
                     ? item.UsedMemoryMb / item.TotalMemoryMb * 100
                     : 0;
 
-            HistoryListBox.Items.Add(
+            viewModel.HistoryItems.Add(
                 $"{item.CreatedAt:HH:mm:ss} | CPU {item.CpuUsage:F1}% | RAM {memoryPercent:F1}%"
             );
         }
@@ -153,21 +138,16 @@ public partial class MainWindow : Window
 
     private void UpdateCpuChart(SystemStats stats)
     {
-        cpuPoints.Add(new ObservablePoint(cpuPoints.Count, stats.CpuUsage));
-
-        if (cpuPoints.Count > MaxCpuChartPoints)
-        {
-            cpuPoints.RemoveAt(0);
-        }
+        viewModel.AddCpuPoint(stats.CpuUsage);
     }
     
     private void UpdateDiagnostics(List<DiagnosticMessageDto> diagnostics)
     {
-        DiagnosticsListBox.Items.Clear();
+        viewModel.DiagnosticItems.Clear();
 
         foreach (DiagnosticMessageDto diagnostic in diagnostics)
         {
-            DiagnosticsListBox.Items.Add(
+            viewModel.DiagnosticItems.Add(
                 $"{diagnostic.Level}: {diagnostic.Message}"
             );
         }

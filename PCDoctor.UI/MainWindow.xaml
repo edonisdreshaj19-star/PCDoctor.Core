@@ -91,13 +91,12 @@
                 <StackPanel>
                     <TextBlock Text="CPU Usage" Style="{StaticResource SectionTitleStyle}"/>
 
-                    <TextBlock x:Name="CpuUsageText"
-                               Text="0%"
+                    <TextBlock Text="{Binding CpuUsageText}"
                                FontSize="44"
                                FontWeight="Bold"
                                Margin="0,16,0,18"/>
 
-                    <ProgressBar x:Name="CpuProgressBar"/>
+                    <ProgressBar Value="{Binding CpuProgressValue}"/>
                 </StackPanel>
             </Border>
 
@@ -105,13 +104,12 @@
                 <StackPanel>
                     <TextBlock Text="Memory Usage" Style="{StaticResource SectionTitleStyle}"/>
 
-                    <TextBlock x:Name="MemoryUsageText"
-                               Text="0 GB / 0 GB"
+                    <TextBlock Text="{Binding MemoryUsageText}"
                                FontSize="28"
                                FontWeight="Bold"
                                Margin="0,22,0,20"/>
 
-                    <ProgressBar x:Name="MemoryProgressBar"/>
+                    <ProgressBar Value="{Binding MemoryProgressValue}"/>
                 </StackPanel>
             </Border>
 
@@ -119,7 +117,7 @@
                 <StackPanel>
                     <TextBlock Text="Top Processes" Style="{StaticResource SectionTitleStyle}"/>
 
-                    <ListBox x:Name="ProcessListBox"
+                    <ListBox ItemsSource="{Binding ProcessItems}"
                              MaxHeight="115"
                              Margin="0,14,0,0"/>
                 </StackPanel>
@@ -132,7 +130,7 @@
                 <StackPanel>
                     <TextBlock Text="Disk Usage" Style="{StaticResource SectionTitleStyle}"/>
 
-                    <ListBox x:Name="DiskListBox"
+                    <ListBox ItemsSource="{Binding DiskItems}"
                              MaxHeight="165"
                              Margin="0,14,0,0"/>
                 </StackPanel>
@@ -148,7 +146,7 @@
                     <StackPanel Grid.Row="0">
                         <TextBlock Text="History" Style="{StaticResource SectionTitleStyle}"/>
 
-                        <ListBox x:Name="HistoryListBox"
+                        <ListBox ItemsSource="{Binding HistoryItems}"
                                  MaxHeight="75"
                                  Margin="0,10,0,0"/>
                     </StackPanel>
@@ -156,7 +154,7 @@
                     <StackPanel Grid.Row="1" Margin="0,14,0,0">
                         <TextBlock Text="Diagnostics" Style="{StaticResource SectionTitleStyle}"/>
 
-                        <ListBox x:Name="DiagnosticsListBox"
+                        <ListBox ItemsSource="{Binding DiagnosticItems}"
                                  MaxHeight="75"
                                  Margin="0,10,0,0"/>
                     </StackPanel>

@@ -17,17 +17,17 @@ public class DiskMonitor
                 continue;
             }
 
-            double totalGB = ConvertBytesToDouble(drive.TotalSize);
-            double freeGB = ConvertBytesToDouble(drive.AvailableFreeSpace);
-            double usedGB = totalGB - freeGB;
-            double usagePercentage = totalGB > 0 ? (usedGB / totalGB) * 100 : 0;
+            double totalGb = ConvertBytesToDouble(drive.TotalSize);
+            double freeGb = ConvertBytesToDouble(drive.AvailableFreeSpace);
+            double usedGb = totalGb - freeGb;
+            double usagePercentage = totalGb > 0 ? (usedGb / totalGb) * 100 : 0;
 
             diskStatsList.Add(new DiskStats
             {
                 DriveName = drive.Name,
-                TotalSpaceGB = totalGB,
-                FreeSpaceGB = freeGB,
-                UsedSpaceGB = usedGB,
+                TotalSpaceGB = totalGb,
+                FreeSpaceGB = freeGb,
+                UsedSpaceGB = usedGb,
                 UsagePercentage = usagePercentage
             });
         }

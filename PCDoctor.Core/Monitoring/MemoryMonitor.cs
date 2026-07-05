@@ -10,10 +10,10 @@ public class MemoryMonitor
 
         if (GlobalMemoryStatusEx(memStatus))
         {
-            float totalRamMB = memStatus.ullTotalPhys / (1024f * 1024f);
-            float availableRamMB = memStatus.ullAvailPhys / (1024f * 1024f);
+            float totalRamMb = memStatus.ullTotalPhys / (1024f * 1024f);
+            float availableRamMb = memStatus.ullAvailPhys / (1024f * 1024f);
 
-            return (totalRamMB, availableRamMB);
+            return (totalRamMb, availableRamMb);
         }
 
         return (-1, -1);

@@ -2,6 +2,7 @@
 
 using System.Net.Http.Json;
 using PCDoctor.Core.Models;
+using Serilog;
 
 namespace PCDoctor.Core.Services;
 
@@ -35,7 +36,7 @@ public class ApiService
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            Log.Error(e, "Failed to send system stats to API.");
         }
     }
     
@@ -50,8 +51,9 @@ public class ApiService
 
             return history ?? new List<SystemStatsHistoryDto>();
         }
-        catch
+        catch (Exception e)
         {
+            Log.Error(e, "Failed to fetch system stats history.");
             return new List<SystemStatsHistoryDto>();
         }
     }
@@ -67,8 +69,9 @@ public class ApiService
 
             return diagnostics ?? new List<DiagnosticMessageDto>();
         }
-        catch
+        catch (Exception e)
         {
+            Log.Error(e, "Failed to fetch diagnostics.");
             return new List<DiagnosticMessageDto>();
         }
     }

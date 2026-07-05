@@ -8,6 +8,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Serilog" Version="4.4.0-dev-02437" />
+      <PackageReference Include="Serilog.Sinks.File" Version="8.0.0-nblumhardt-02322" />
       <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="11.0.0-preview.5.26302.115" />
     </ItemGroup>
 

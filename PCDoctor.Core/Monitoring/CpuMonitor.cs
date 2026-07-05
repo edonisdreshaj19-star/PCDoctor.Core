@@ -1,15 +1,17 @@
-﻿namespace PCDoctor.Core.Monitoring;
+﻿using Serilog;
 using System.Diagnostics;
+
+namespace PCDoctor.Core.Monitoring;
 
 public class CpuMonitor
 {
-    private readonly PerformanceCounter cpuCounter;
+    private readonly PerformanceCounter _cpuCounter;
     
     public CpuMonitor()
     {
-        cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
+        _cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
         
-        cpuCounter.NextValue();
+        _cpuCounter.NextValue();
         Thread.Sleep(100);
     }
     
@@ -17,10 +19,11 @@ public class CpuMonitor
     {
         try
         {
-            return cpuCounter.NextValue();
+            return _cpuCounter.NextValue();
         }
-        catch
+        catch (Exception e)
         {
+            Log.Warning(e, "Failed to read CPU usage.");
             return -1;
         }
     }

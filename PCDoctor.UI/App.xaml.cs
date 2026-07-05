@@ -1,6 +1,7 @@
 ﻿using System.Configuration;
 using System.Data;
 using System.Windows;
+using PCDoctor.Core.Services;
 
 namespace PCDoctor.UI
 {
@@ -9,6 +10,16 @@ namespace PCDoctor.UI
     /// </summary>
     public partial class App : Application
     {
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            LoggerService.Configure();
+            base.OnStartup(e);
+        }
+        
+        protected override void OnExit(ExitEventArgs e)
+        {
+            LoggerService.Close();
+            base.OnExit(e);
+        }
     }
-
 }

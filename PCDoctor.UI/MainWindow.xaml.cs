@@ -13,6 +13,7 @@ public partial class MainWindow : Window
     private readonly SystemMonitor monitor;
     private readonly ApiService apiService;
     private readonly SettingsService settingsService;
+    private readonly WindowService windowService;
     private readonly MainViewModel viewModel;
     
 
@@ -26,6 +27,7 @@ public partial class MainWindow : Window
 
         monitor = new SystemMonitor();
         apiService = new ApiService(settings);
+        windowService = new WindowService(settings, settingsService);
 
         DashboardFormatter formatter = new();
         
@@ -35,20 +37,10 @@ public partial class MainWindow : Window
             apiService
         );
         
-        viewModel = new MainViewModel(settings, monitoringService, formatter);
+        viewModel = new MainViewModel(settings, monitoringService, formatter, windowService);
         DataContext = viewModel;
         
         viewModel.StartMonitoring();
-    }
-    
-    private void SettingsButton_Click(object sender, RoutedEventArgs e)
-    {
-        SettingsWindow settingsWindow = new(settings, settingsService)
-        {
-            Owner = this
-        };
-
-        settingsWindow.ShowDialog();
     }
     
     protected override void OnClosed(EventArgs e)

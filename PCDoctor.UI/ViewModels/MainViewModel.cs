@@ -1,9 +1,11 @@
 ﻿using System.Collections.ObjectModel;
+using System.Windows.Input;
 using LiveChartsCore;
 using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView;
 using PCDoctor.Core.Models;
 using PCDoctor.Models;
+using PCDoctor.UI.Commands;
 using PCDoctor.UI.Models;
 using PCDoctor.UI.Services;
 
@@ -19,6 +21,8 @@ public class MainViewModel : BaseViewModel
     public ObservableCollection<string> ProcessItems { get; } = new();
     public ObservableCollection<string> HistoryItems { get; } = new();
     public ObservableCollection<string> DiagnosticItems { get; } = new();
+    private readonly WindowService windowService;
+    public ICommand OpenSettingsCommand { get; }
     private readonly AppSettings settings;
     private readonly MonitoringService monitoringService;
     private string cpuUsageText = "0%";
@@ -66,12 +70,13 @@ public class MainViewModel : BaseViewModel
     }
     public ISeries[] CpuSeries { get; }
 
-    public MainViewModel(AppSettings settings, MonitoringService monitoringService, DashboardFormatter formatter)
+    public MainViewModel(AppSettings settings, MonitoringService monitoringService, DashboardFormatter formatter, WindowService windowService)
     {
         this.settings = settings;
         this.monitoringService = monitoringService;
         this.formatter = formatter;
-        
+        this.windowService = windowService;
+        OpenSettingsCommand = new RelayCommand(windowService.OpenSettingsWindow);
         CpuSeries = new ISeries[]
         {
             new LineSeries<ObservablePoint>

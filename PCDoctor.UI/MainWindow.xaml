@@ -71,7 +71,7 @@
                     Width="110"
                     Height="36"
                     Margin="0,8,10,0"
-                    Click="SettingsButton_Click"/>
+                    Command="{Binding OpenSettingsCommand}"/>
         </Grid>
 
         <Grid Grid.Row="1">

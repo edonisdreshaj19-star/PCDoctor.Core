@@ -2,6 +2,7 @@
 using PCDoctor.Core.Models;
 using PCDoctor.Core.Monitoring;
 using PCDoctor.Core.Services;
+using PCDoctor.UI.Services;
 using PCDoctor.UI.ViewModels;
 
 namespace PCDoctor.UI;
@@ -13,6 +14,7 @@ public partial class MainWindow : Window
     private readonly ApiService apiService;
     private readonly SettingsService settingsService;
     private readonly MainViewModel viewModel;
+    
 
     public MainWindow()
     {
@@ -25,7 +27,15 @@ public partial class MainWindow : Window
         monitor = new SystemMonitor();
         apiService = new ApiService(settings);
 
-        viewModel = new MainViewModel(settings, monitor, apiService);
+        DashboardFormatter formatter = new();
+        
+        MonitoringService monitoringService = new(
+            settings,
+            monitor,
+            apiService
+        );
+        
+        viewModel = new MainViewModel(settings, monitoringService, formatter);
         DataContext = viewModel;
         
         viewModel.StartMonitoring();
@@ -39,5 +49,11 @@ public partial class MainWindow : Window
         };
 
         settingsWindow.ShowDialog();
+    }
+    
+    protected override void OnClosed(EventArgs e)
+    {
+        viewModel.StopMonitoring();
+        base.OnClosed(e);
     }
 }

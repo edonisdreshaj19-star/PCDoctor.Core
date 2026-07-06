@@ -209,7 +209,7 @@ Open the solution in Rider or Visual Studio and start **PCDoctor.UI**.
 
 ### Settings
 
-> ![PCDoctor Settings](screenshots/settings.png)
+> ![PCDoctor Settings](screenshots/settingsWindow.png)
 
 ### CPU History
 

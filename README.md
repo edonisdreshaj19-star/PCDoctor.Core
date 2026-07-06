@@ -209,15 +209,15 @@ Open the solution in Rider or Visual Studio and start **PCDoctor.UI**.
 
 > ### Settings
 
-> ![PCDoctor Dashboard](screenshots/settings.png)
+> ![PCDoctor Settings](screenshots/settings.png)
 
 ### CPU History
 
-> ![PCDoctor Dashboard](screenshots/api-response.png)
+> ![PCDoctor Api](screenshots/api-response.png)
 
 ### PostgreSQL Database
 
-> ![PCDoctor Dashboard](screenshots/postgresql.png)
+> ![PCDoctor Datenbank](screenshots/postgresql.png)
 
 ---
 

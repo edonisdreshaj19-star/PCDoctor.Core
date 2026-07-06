@@ -1,95 +1,251 @@
-# PCDoctor – System Monitoring & Diagnosis Platform
+# PCDoctor – System Monitoring & Diagnostics Platform
 
-PCDoctor is a desktop-based system monitoring application built with C#, WPF, Java Spring Boot, REST APIs, and PostgreSQL.
+PCDoctor is a full-stack system monitoring application built with **C#**, **WPF**, **Java Spring Boot**, **REST APIs**, **PostgreSQL**, and **Docker**.
 
-The application monitors system resources such as CPU usage, memory usage, disk usage, and running processes in real time. The collected data is displayed in a modern WPF dashboard and sent to a Spring Boot backend for persistence and further analysis.
+The application continuously monitors system resources such as CPU usage, memory usage, disk usage, and running processes in real time. The collected metrics are displayed in a modern WPF dashboard and periodically sent to a Spring Boot backend for persistence, historical analysis, and diagnostics.
+
+---
 
 ## Features
 
-* Real-time CPU monitoring
-* Real-time RAM monitoring
-* Disk usage overview
-* Top running processes by memory usage
-* Modern WPF dashboard
-* Java Spring Boot REST API
-* PostgreSQL persistence
-* History endpoint for stored system statistics
-* Basic diagnostic warnings for high CPU and memory usage
+- Real-time CPU monitoring
+- Real-time memory monitoring
+- Disk usage overview
+- Top running processes by memory consumption
+- Live CPU history chart (LiveCharts2)
+- Modern WPF dashboard (MVVM architecture)
+- Configurable refresh and API synchronization intervals
+- Java Spring Boot REST API
+- PostgreSQL persistence
+- Historical system statistics
+- Basic diagnostic warnings for high CPU and memory usage
+- Docker support for backend and database
+- Structured logging with Serilog
+
+---
 
 ## Architecture
 
-PCDoctor consists of three main parts:
+PCDoctor consists of three main components:
 
-* **PCDoctor.UI** – WPF desktop application
-* **PCDoctor.Core** – C# core monitoring logic
-* **pcdoctor-api** – Java Spring Boot backend
+```
+PCDoctor.UI
+│
+├── WPF Desktop Application
+├── MVVM Architecture
+├── LiveCharts2 Dashboard
+└── REST Client
 
-Data flow:
+        │
+        ▼
 
-WPF Client → C# Core → REST API → Spring Boot Backend → PostgreSQL
+PCDoctor.Core
+│
+├── System Monitoring
+├── API Communication
+├── Business Logic
+└── Monitoring Services
+
+        │
+        ▼
+
+Spring Boot REST API
+│
+├── REST Controllers
+├── Service Layer
+├── Spring Data JPA
+└── PostgreSQL Database
+```
+
+### Data Flow
+
+```
+System Resources
+        │
+        ▼
+PCDoctor.Core
+        │
+        ▼
+WPF Dashboard
+        │
+        ▼
+REST API
+        │
+        ▼
+Spring Boot
+        │
+        ▼
+PostgreSQL
+```
+
+---
 
 ## Technologies
 
-* C#
-* .NET / WPF
-* Java
-* Spring Boot
-* REST APIs
-* PostgreSQL
-* Spring Data JPA
-* Git
+### Frontend
 
-## API Endpoints
+- C#
+- .NET
+- WPF
+- MVVM
+- LiveCharts2
 
-### Send system statistics
+### Backend
 
-POST `/api/system-stats`
+- Java 17
+- Spring Boot
+- Spring Data JPA
+- REST API
+
+### Database
+
+- PostgreSQL
+
+### DevOps
+
+- Docker
+- Docker Compose
+- Git
+
+### Logging
+
+- Serilog
+
+---
+
+## REST API
+
+### Store system statistics
+
+```
+POST /api/system-stats
+```
 
 ### Get latest statistics
 
-GET `/api/system-stats/latest`
+```
+GET /api/system-stats/latest
+```
 
 ### Get history
 
-GET `/api/system-stats/history`
+```
+GET /api/system-stats/history
+```
 
 ### Get diagnostics
 
-GET `/api/system-stats/diagnostics`
+```
+GET /api/system-stats/diagnostics
+```
+
+---
 
 ## Database
 
-The backend stores system statistics in PostgreSQL using Spring Data JPA.
+The backend stores system statistics including:
 
-Example stored values:
+- CPU usage
+- Used memory
+- Total memory
+- Timestamp
 
-* CPU usage
-* Used memory
-* Total memory
-* Timestamp
+---
 
-## Setup
+## Project Structure
 
-1. Install PostgreSQL.
-2. Create a database named `pcdoctor`.
-3. Set the environment variable `DB_PASSWORD` with your PostgreSQL password.
-4. Start the Spring Boot backend.
-5. Start the WPF application.
+```
+PCDoctor
+│
+├── PCDoctor.UI          # WPF Desktop Application
+├── PCDoctor.Core        # Monitoring & Business Logic
+├── pcdoctor-api         # Spring Boot REST API
+├── docker-compose.yml
+└── README.md
+```
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- .NET SDK
+- Java 17+
+- Docker Desktop
+
+### Clone the repository
+
+```bash
+git clone https://github.com/<your-username>/PCDoctor.git
+cd PCDoctor
+```
+
+### Configure environment variables
+
+Create a `.env` file in the project root:
+
+```env
+DB_PASSWORD=your_password
+```
+
+### Start PostgreSQL and Backend
+
+```bash
+docker compose up -d --build
+```
+
+### Run the WPF application
+
+Open the solution in Rider or Visual Studio and start **PCDoctor.UI**.
+
+---
 
 ## Screenshots
 
 ### Dashboard
 
-![PCDoctor Dashboard](screenshots/dashboard.png)
+> ![PCDoctor Dashboard](screenshots/dashboard.png)
 
-### API Response
+> ### Settings
 
-![REST API Response](screenshots/api-response.png)
+> ![PCDoctor Dashboard](screenshots/settings.png)
 
-### PostgreSQL Data
+### CPU History
 
-![PostgreSQL](screenshots/postgresql.png)
+> ![PCDoctor Dashboard](screenshots/api-response.png)
 
-## Project Status
+### PostgreSQL Database
 
-This project is currently in development and is used as a portfolio project to demonstrate desktop development, backend development, REST communication, database integration, and clean software architecture.
+> ![PCDoctor Dashboard](screenshots/postgresql.png)
+
+---
+
+## Current Project Status
+
+🚧 **Work in Progress**
+
+Current focus areas include:
+
+- Improving diagnostics
+- Additional performance metrics
+- UI enhancements
+- Unit testing
+- CI/CD pipeline
+- Application installer
+
+---
+
+## Learning Goals
+
+This project serves as a portfolio application demonstrating:
+
+- Desktop application development with WPF
+- MVVM architecture
+- Clean software architecture
+- REST API development
+- Java Spring Boot
+- PostgreSQL integration
+- Docker containerization
+- Logging and diagnostics
+- Full-stack application development

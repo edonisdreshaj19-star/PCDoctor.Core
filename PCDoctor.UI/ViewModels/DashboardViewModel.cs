@@ -33,6 +33,7 @@ public class DashboardViewModel : BaseViewModel
     public ObservableCollection<ProcessListItem> ProcessRows { get; } = new();
     public ObservableCollection<string> HistoryItems { get; } = new();
     public ObservableCollection<string> HistoryPreviewItems { get; } = new();
+    public ObservableCollection<HistoryListItem> HistoryRows { get; } = new();
     public ObservableCollection<string> DiagnosticItems { get; } = new();
     public ObservableCollection<string> HealthReasonItems { get; } = new();
     public ObservableCollection<string> HealthRecommendationItems { get; } = new();
@@ -236,6 +237,41 @@ public class DashboardViewModel : BaseViewModel
         set => SetProperty(ref processAlertBrush, value);
     }
 
+    private string historyCountText = "0 entries";
+    public string HistoryCountText
+    {
+        get => historyCountText;
+        set => SetProperty(ref historyCountText, value);
+    }
+
+    private string latestHistoryTimeText = "-";
+    public string LatestHistoryTimeText
+    {
+        get => latestHistoryTimeText;
+        set => SetProperty(ref latestHistoryTimeText, value);
+    }
+
+    private string latestHistoryUsageText = "-";
+    public string LatestHistoryUsageText
+    {
+        get => latestHistoryUsageText;
+        set => SetProperty(ref latestHistoryUsageText, value);
+    }
+
+    private string historyAlertText = "No data";
+    public string HistoryAlertText
+    {
+        get => historyAlertText;
+        set => SetProperty(ref historyAlertText, value);
+    }
+
+    private Brush historyAlertBrush = Brushes.Gray;
+    public Brush HistoryAlertBrush
+    {
+        get => historyAlertBrush;
+        set => SetProperty(ref historyAlertBrush, value);
+    }
+
     public ISeries[] CpuSeries { get; }
 
     public Axis[] CpuXAxes { get; }
@@ -375,6 +411,11 @@ public class DashboardViewModel : BaseViewModel
 
         HistoryItems.Add("Waiting for history data...");
         HistoryPreviewItems.Add("Waiting for history data...");
+        HistoryCountText = "0 entries";
+        LatestHistoryTimeText = "-";
+        LatestHistoryUsageText = "-";
+        HistoryAlertText = "No data";
+        HistoryAlertBrush = Brushes.Gray;
     }
 
     private void UpdateApiStatus(MonitoringResult result)
@@ -416,28 +457,79 @@ public class DashboardViewModel : BaseViewModel
     {
         HistoryItems.Clear();
         HistoryPreviewItems.Clear();
+        HistoryRows.Clear();
 
-        List<string> formattedHistory = history
+        List<SystemStatsHistoryDto> sortedHistory = history
+            .OrderByDescending(item => item.CreatedAt)
             .Take(FullHistoryCount)
-            .Select(formatter.FormatHistory)
             .ToList();
 
-        if (formattedHistory.Count == 0)
+        if (sortedHistory.Count == 0)
         {
             HistoryItems.Add("No history entries available yet.");
             HistoryPreviewItems.Add("No recent history available yet.");
+
+            HistoryCountText = "0 entries";
+            LatestHistoryTimeText = "-";
+            LatestHistoryUsageText = "-";
+            HistoryAlertText = "No data";
+            HistoryAlertBrush = Brushes.Gray;
+
             return;
         }
 
-        foreach (string item in formattedHistory)
+        foreach (SystemStatsHistoryDto item in sortedHistory)
         {
-            HistoryItems.Add(item);
+            HistoryItems.Add(formatter.FormatHistory(item));
         }
 
-        foreach (string item in formattedHistory.Take(HistoryPreviewCount))
+        foreach (string item in HistoryItems.Take(HistoryPreviewCount))
         {
             HistoryPreviewItems.Add(item);
         }
+
+        for (int index = 0; index < sortedHistory.Count; index++)
+        {
+            HistoryRows.Add(HistoryListItem.Create(index + 1, sortedHistory[index]));
+        }
+
+        SystemStatsHistoryDto latestItem = sortedHistory[0];
+        double latestMemoryPercent = CalculateMemoryUsagePercent(latestItem);
+
+        HistoryCountText = $"{sortedHistory.Count} entries";
+        LatestHistoryTimeText = latestItem.CreatedAt.ToString("HH:mm:ss");
+        LatestHistoryUsageText = $"{latestItem.CpuUsage:F1}% / {latestMemoryPercent:F1}%";
+
+        UpdateHistoryAlert(latestItem.CpuUsage, latestMemoryPercent);
+    }
+
+    private static double CalculateMemoryUsagePercent(SystemStatsHistoryDto item)
+    {
+        return item.TotalMemoryMb > 0
+            ? item.UsedMemoryMb / item.TotalMemoryMb * 100
+            : 0;
+    }
+
+    private void UpdateHistoryAlert(double cpuUsage, double memoryUsage)
+    {
+        double highestUsage = Math.Max(cpuUsage, memoryUsage);
+
+        if (highestUsage >= 85)
+        {
+            HistoryAlertText = "Critical";
+            HistoryAlertBrush = Brushes.IndianRed;
+            return;
+        }
+
+        if (highestUsage >= 70)
+        {
+            HistoryAlertText = "Warning";
+            HistoryAlertBrush = Brushes.Gold;
+            return;
+        }
+
+        HistoryAlertText = "Normal";
+        HistoryAlertBrush = Brushes.LightGreen;
     }
 
     private void UpdateDiagnostics(List<DiagnosticMessageDto> diagnostics)
@@ -731,5 +823,98 @@ public class ProcessListItem
             memoryUsageBarValue: barValue,
             memoryLevelText: memoryLevelText,
             memoryUsageBrush: memoryUsageBrush);
+    }
+}
+
+public class HistoryListItem
+{
+    public string PositionText { get; }
+    public string CreatedAtText { get; }
+    public string CpuUsageText { get; }
+    public double CpuUsageBarValue { get; }
+    public Brush CpuUsageBrush { get; }
+    public string MemoryUsageText { get; }
+    public double MemoryUsageBarValue { get; }
+    public Brush MemoryUsageBrush { get; }
+    public string LevelText { get; }
+    public Brush LevelBrush { get; }
+
+    private HistoryListItem(
+        string positionText,
+        string createdAtText,
+        string cpuUsageText,
+        double cpuUsageBarValue,
+        Brush cpuUsageBrush,
+        string memoryUsageText,
+        double memoryUsageBarValue,
+        Brush memoryUsageBrush,
+        string levelText,
+        Brush levelBrush)
+    {
+        PositionText = positionText;
+        CreatedAtText = createdAtText;
+        CpuUsageText = cpuUsageText;
+        CpuUsageBarValue = cpuUsageBarValue;
+        CpuUsageBrush = cpuUsageBrush;
+        MemoryUsageText = memoryUsageText;
+        MemoryUsageBarValue = memoryUsageBarValue;
+        MemoryUsageBrush = memoryUsageBrush;
+        LevelText = levelText;
+        LevelBrush = levelBrush;
+    }
+
+    public static HistoryListItem Create(int position, SystemStatsHistoryDto item)
+    {
+        double memoryUsagePercent = item.TotalMemoryMb > 0
+            ? item.UsedMemoryMb / item.TotalMemoryMb * 100
+            : 0;
+
+        double highestUsage = Math.Max(item.CpuUsage, memoryUsagePercent);
+
+        string levelText;
+        Brush levelBrush;
+
+        if (highestUsage >= 85)
+        {
+            levelText = "CRITICAL";
+            levelBrush = Brushes.IndianRed;
+        }
+        else if (highestUsage >= 70)
+        {
+            levelText = "WARNING";
+            levelBrush = Brushes.Gold;
+        }
+        else
+        {
+            levelText = "NORMAL";
+            levelBrush = Brushes.LightGreen;
+        }
+
+        return new HistoryListItem(
+            positionText: $"#{position}",
+            createdAtText: item.CreatedAt.ToString("HH:mm:ss"),
+            cpuUsageText: $"{item.CpuUsage:F1}%",
+            cpuUsageBarValue: Math.Clamp(item.CpuUsage, 0, 100),
+            cpuUsageBrush: GetUsageBrush(item.CpuUsage),
+            memoryUsageText: $"{memoryUsagePercent:F1}%",
+            memoryUsageBarValue: Math.Clamp(memoryUsagePercent, 0, 100),
+            memoryUsageBrush: GetUsageBrush(memoryUsagePercent),
+            levelText: levelText,
+            levelBrush: levelBrush);
+    }
+
+    private static Brush GetUsageBrush(double usagePercent)
+    {
+        if (usagePercent >= 85)
+        {
+            return Brushes.IndianRed;
+        }
+
+        if (usagePercent >= 70)
+        {
+            return Brushes.Gold;
+        }
+
+        return Brushes.LightGreen;
     }
 }

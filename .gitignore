@@ -363,3 +363,19 @@ MigrationBackup/
 FodyWeavers.xsd
 
 .env
+
+pcdoctor-api-backup/
+
+# Java / Gradle
+.gradle/
+**/.gradle/
+**/build/
+!**/gradle/wrapper/gradle-wrapper.jar
+
+# IntelliJ / Rider Java project files
+.idea/
+**/.idea/
+*.iml
+
+# Logs
+*.log

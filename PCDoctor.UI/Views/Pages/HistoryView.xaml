@@ -41,7 +41,7 @@
                             <TextBlock Text="ENTRIES"
                                        Style="{StaticResource HeaderTextStyle}"/>
 
-                            <TextBlock Text="{Binding Dashboard.HistoryCountText}"
+                            <TextBlock Text="{Binding History.HistoryCountText}"
                                        Style="{StaticResource ValueTextStyle}"/>
                         </StackPanel>
                     </Border>
@@ -52,7 +52,7 @@
                             <TextBlock Text="LATEST SNAPSHOT"
                                        Style="{StaticResource HeaderTextStyle}"/>
 
-                            <TextBlock Text="{Binding Dashboard.LatestHistoryTimeText}"
+                            <TextBlock Text="{Binding History.LatestHistoryTimeText}"
                                        Style="{StaticResource ValueTextStyle}"/>
                         </StackPanel>
                     </Border>
@@ -63,7 +63,7 @@
                             <TextBlock Text="LATEST CPU / RAM"
                                        Style="{StaticResource HeaderTextStyle}"/>
 
-                            <TextBlock Text="{Binding Dashboard.LatestHistoryUsageText}"
+                            <TextBlock Text="{Binding History.LatestHistoryUsageText}"
                                        Style="{StaticResource ValueTextStyle}"/>
                         </StackPanel>
                     </Border>
@@ -75,8 +75,8 @@
                             <TextBlock Text="PRESSURE"
                                        Style="{StaticResource HeaderTextStyle}"/>
 
-                            <TextBlock Text="{Binding Dashboard.HistoryAlertText}"
-                                       Foreground="{Binding Dashboard.HistoryAlertBrush}"
+                            <TextBlock Text="{Binding History.HistoryAlertText}"
+                                       Foreground="{Binding History.HistoryAlertBrush}"
                                        Style="{StaticResource ValueTextStyle}"/>
                         </StackPanel>
                     </Border>
@@ -129,7 +129,7 @@
                 <ScrollViewer Grid.Row="4"
                               VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled">
-                    <ItemsControl ItemsSource="{Binding Dashboard.HistoryRows}">
+                    <ItemsControl ItemsSource="{Binding History.HistoryRows}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Border Background="#10172A"

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
+﻿using System.Collections.ObjectModel;
 using System.Windows.Media;
 using LiveChartsCore;
 using LiveChartsCore.Drawing;
@@ -20,7 +17,6 @@ public class DashboardViewModel : BaseViewModel
     private const int MaxCpuChartPoints = 30;
     private const int ProcessPreviewCount = 3;
     private const int HistoryPreviewCount = 3;
-    private const int FullHistoryCount = 25;
     private const int DiskPreviewCount = 3;
 
     private readonly DashboardFormatter formatter;
@@ -30,16 +26,11 @@ public class DashboardViewModel : BaseViewModel
     public ObservableCollection<string> DiskPreviewItems { get; } = new();
     public ObservableCollection<string> ProcessItems { get; } = new();
     public ObservableCollection<string> ProcessPreviewItems { get; } = new();
-    public ObservableCollection<ProcessListItem> ProcessRows { get; } = new();
     public ObservableCollection<string> HistoryItems { get; } = new();
     public ObservableCollection<string> HistoryPreviewItems { get; } = new();
-    public ObservableCollection<HistoryListItem> HistoryRows { get; } = new();
     public ObservableCollection<string> DiagnosticItems { get; } = new();
     public ObservableCollection<string> HealthReasonItems { get; } = new();
     public ObservableCollection<string> HealthRecommendationItems { get; } = new();
-
-    public ObservableCollection<string> ReportDetectedIssueItems { get; } = new();
-    public ObservableCollection<string> ReportRecommendationItems { get; } = new();
 
     private string cpuUsageText = "0%";
     public string CpuUsageText
@@ -160,118 +151,6 @@ public class DashboardViewModel : BaseViewModel
         set => SetProperty(ref healthStatusBrush, value);
     }
 
-    private string diagnosticReportScoreText = "-- / 100";
-    public string DiagnosticReportScoreText
-    {
-        get => diagnosticReportScoreText;
-        set => SetProperty(ref diagnosticReportScoreText, value);
-    }
-
-    private double diagnosticReportProgressValue;
-    public double DiagnosticReportProgressValue
-    {
-        get => diagnosticReportProgressValue;
-        set => SetProperty(ref diagnosticReportProgressValue, value);
-    }
-
-    private string diagnosticReportStatusText = "NO REPORT";
-    public string DiagnosticReportStatusText
-    {
-        get => diagnosticReportStatusText;
-        set => SetProperty(ref diagnosticReportStatusText, value);
-    }
-
-    private Brush diagnosticReportStatusBrush = Brushes.Gray;
-    public Brush DiagnosticReportStatusBrush
-    {
-        get => diagnosticReportStatusBrush;
-        set => SetProperty(ref diagnosticReportStatusBrush, value);
-    }
-
-    private string diagnosticReportSummaryText = "No diagnostic report generated yet.";
-    public string DiagnosticReportSummaryText
-    {
-        get => diagnosticReportSummaryText;
-        set => SetProperty(ref diagnosticReportSummaryText, value);
-    }
-
-    private string diagnosticReportCreatedAtText = "Created: -";
-    public string DiagnosticReportCreatedAtText
-    {
-        get => diagnosticReportCreatedAtText;
-        set => SetProperty(ref diagnosticReportCreatedAtText, value);
-    }
-
-    private string diagnosticReportButtonText = "Run Diagnosis";
-    public string DiagnosticReportButtonText
-    {
-        get => diagnosticReportButtonText;
-        set => SetProperty(ref diagnosticReportButtonText, value);
-    }
-
-    private string processCountText = "0 processes";
-    public string ProcessCountText
-    {
-        get => processCountText;
-        set => SetProperty(ref processCountText, value);
-    }
-
-    private string heaviestProcessText = "-";
-    public string HeaviestProcessText
-    {
-        get => heaviestProcessText;
-        set => SetProperty(ref heaviestProcessText, value);
-    }
-
-    private string processAlertText = "No data";
-    public string ProcessAlertText
-    {
-        get => processAlertText;
-        set => SetProperty(ref processAlertText, value);
-    }
-
-    private Brush processAlertBrush = Brushes.Gray;
-    public Brush ProcessAlertBrush
-    {
-        get => processAlertBrush;
-        set => SetProperty(ref processAlertBrush, value);
-    }
-
-    private string historyCountText = "0 entries";
-    public string HistoryCountText
-    {
-        get => historyCountText;
-        set => SetProperty(ref historyCountText, value);
-    }
-
-    private string latestHistoryTimeText = "-";
-    public string LatestHistoryTimeText
-    {
-        get => latestHistoryTimeText;
-        set => SetProperty(ref latestHistoryTimeText, value);
-    }
-
-    private string latestHistoryUsageText = "-";
-    public string LatestHistoryUsageText
-    {
-        get => latestHistoryUsageText;
-        set => SetProperty(ref latestHistoryUsageText, value);
-    }
-
-    private string historyAlertText = "No data";
-    public string HistoryAlertText
-    {
-        get => historyAlertText;
-        set => SetProperty(ref historyAlertText, value);
-    }
-
-    private Brush historyAlertBrush = Brushes.Gray;
-    public Brush HistoryAlertBrush
-    {
-        get => historyAlertBrush;
-        set => SetProperty(ref historyAlertBrush, value);
-    }
-
     public ISeries[] CpuSeries { get; }
 
     public Axis[] CpuXAxes { get; }
@@ -322,7 +201,6 @@ public class DashboardViewModel : BaseViewModel
         };
 
         SetInitialPreviewState();
-        UpdateDiagnosticReport(null);
     }
 
     public void Update(MonitoringResult result)
@@ -354,49 +232,6 @@ public class DashboardViewModel : BaseViewModel
         AddCpuPoint(stats.CpuUsage);
     }
 
-    public void UpdateDiagnosticReport(DiagnosticReportResponse? report)
-    {
-        ReportDetectedIssueItems.Clear();
-        ReportRecommendationItems.Clear();
-
-        if (report == null)
-        {
-            DiagnosticReportScoreText = "-- / 100";
-            DiagnosticReportProgressValue = 0;
-            DiagnosticReportStatusText = "NO REPORT";
-            DiagnosticReportStatusBrush = Brushes.Gray;
-            DiagnosticReportSummaryText = "No diagnostic report generated yet.";
-            DiagnosticReportCreatedAtText = "Created: -";
-
-            ReportDetectedIssueItems.Add("Run a diagnosis to generate a report.");
-            ReportRecommendationItems.Add("No recommendations available yet.");
-
-            return;
-        }
-
-        DiagnosticReportScoreText = $"{report.HealthScore} / 100";
-        DiagnosticReportProgressValue = report.HealthScore;
-        DiagnosticReportStatusText = report.Status;
-        DiagnosticReportStatusBrush = GetHealthStatusBrush(report.Status);
-        DiagnosticReportSummaryText = report.Summary;
-        DiagnosticReportCreatedAtText = $"Created: {report.CreatedAt:HH:mm:ss}";
-
-        foreach (string issue in report.DetectedIssues.Distinct())
-        {
-            ReportDetectedIssueItems.Add($"• {issue}");
-        }
-
-        foreach (string recommendation in report.Recommendations.Distinct())
-        {
-            ReportRecommendationItems.Add($"• {recommendation}");
-        }
-    }
-
-    public void SetDiagnosticReportLoading(bool isLoading)
-    {
-        DiagnosticReportButtonText = isLoading ? "Running..." : "Run Diagnosis";
-    }
-
     private void SetInitialPreviewState()
     {
         DiskItems.Add("Waiting for disk data...");
@@ -404,18 +239,9 @@ public class DashboardViewModel : BaseViewModel
 
         ProcessItems.Add("Waiting for process data...");
         ProcessPreviewItems.Add("Waiting for process data...");
-        ProcessCountText = "0 processes";
-        HeaviestProcessText = "-";
-        ProcessAlertText = "No data";
-        ProcessAlertBrush = Brushes.Gray;
 
         HistoryItems.Add("Waiting for history data...");
         HistoryPreviewItems.Add("Waiting for history data...");
-        HistoryCountText = "0 entries";
-        LatestHistoryTimeText = "-";
-        LatestHistoryUsageText = "-";
-        HistoryAlertText = "No data";
-        HistoryAlertBrush = Brushes.Gray;
     }
 
     private void UpdateApiStatus(MonitoringResult result)
@@ -457,79 +283,26 @@ public class DashboardViewModel : BaseViewModel
     {
         HistoryItems.Clear();
         HistoryPreviewItems.Clear();
-        HistoryRows.Clear();
 
         List<SystemStatsHistoryDto> sortedHistory = history
             .OrderByDescending(item => item.CreatedAt)
-            .Take(FullHistoryCount)
+            .Take(HistoryPreviewCount)
             .ToList();
 
         if (sortedHistory.Count == 0)
         {
             HistoryItems.Add("No history entries available yet.");
             HistoryPreviewItems.Add("No recent history available yet.");
-
-            HistoryCountText = "0 entries";
-            LatestHistoryTimeText = "-";
-            LatestHistoryUsageText = "-";
-            HistoryAlertText = "No data";
-            HistoryAlertBrush = Brushes.Gray;
-
             return;
         }
 
         foreach (SystemStatsHistoryDto item in sortedHistory)
         {
-            HistoryItems.Add(formatter.FormatHistory(item));
+            string formattedItem = formatter.FormatHistory(item);
+
+            HistoryItems.Add(formattedItem);
+            HistoryPreviewItems.Add(formattedItem);
         }
-
-        foreach (string item in HistoryItems.Take(HistoryPreviewCount))
-        {
-            HistoryPreviewItems.Add(item);
-        }
-
-        for (int index = 0; index < sortedHistory.Count; index++)
-        {
-            HistoryRows.Add(HistoryListItem.Create(index + 1, sortedHistory[index]));
-        }
-
-        SystemStatsHistoryDto latestItem = sortedHistory[0];
-        double latestMemoryPercent = CalculateMemoryUsagePercent(latestItem);
-
-        HistoryCountText = $"{sortedHistory.Count} entries";
-        LatestHistoryTimeText = latestItem.CreatedAt.ToString("HH:mm:ss");
-        LatestHistoryUsageText = $"{latestItem.CpuUsage:F1}% / {latestMemoryPercent:F1}%";
-
-        UpdateHistoryAlert(latestItem.CpuUsage, latestMemoryPercent);
-    }
-
-    private static double CalculateMemoryUsagePercent(SystemStatsHistoryDto item)
-    {
-        return item.TotalMemoryMb > 0
-            ? item.UsedMemoryMb / item.TotalMemoryMb * 100
-            : 0;
-    }
-
-    private void UpdateHistoryAlert(double cpuUsage, double memoryUsage)
-    {
-        double highestUsage = Math.Max(cpuUsage, memoryUsage);
-
-        if (highestUsage >= 85)
-        {
-            HistoryAlertText = "Critical";
-            HistoryAlertBrush = Brushes.IndianRed;
-            return;
-        }
-
-        if (highestUsage >= 70)
-        {
-            HistoryAlertText = "Warning";
-            HistoryAlertBrush = Brushes.Gold;
-            return;
-        }
-
-        HistoryAlertText = "Normal";
-        HistoryAlertBrush = Brushes.LightGreen;
     }
 
     private void UpdateDiagnostics(List<DiagnosticMessageDto> diagnostics)
@@ -643,75 +416,26 @@ public class DashboardViewModel : BaseViewModel
     {
         ProcessItems.Clear();
         ProcessPreviewItems.Clear();
-        ProcessRows.Clear();
 
         List<ProcessStats> sortedProcesses = stats.TopProcesses
             .OrderByDescending(process => process.MemoryUsageMB)
+            .Take(ProcessPreviewCount)
             .ToList();
 
         if (sortedProcesses.Count == 0)
         {
             ProcessItems.Add("No process data available yet.");
             ProcessPreviewItems.Add("No process data available yet.");
-
-            ProcessCountText = "0 processes";
-            HeaviestProcessText = "-";
-            ProcessAlertText = "No data";
-            ProcessAlertBrush = Brushes.Gray;
-
             return;
         }
 
         foreach (ProcessStats process in sortedProcesses)
         {
-            ProcessItems.Add(formatter.FormatProcess(process));
+            string formattedItem = formatter.FormatProcess(process);
+
+            ProcessItems.Add(formattedItem);
+            ProcessPreviewItems.Add(formattedItem);
         }
-
-        foreach (string item in ProcessItems.Take(ProcessPreviewCount))
-        {
-            ProcessPreviewItems.Add(item);
-        }
-
-        double highestMemoryUsage = sortedProcesses.Max(process => process.MemoryUsageMB);
-
-        for (int index = 0; index < sortedProcesses.Count; index++)
-        {
-            ProcessStats process = sortedProcesses[index];
-
-            ProcessRows.Add(ProcessListItem.Create(
-                position: index + 1,
-                processName: process.ProcessName,
-                processId: process.ProcessId,
-                memoryUsageMb: process.MemoryUsageMB,
-                highestMemoryUsageMb: highestMemoryUsage));
-        }
-
-        ProcessStats heaviestProcess = sortedProcesses[0];
-
-        ProcessCountText = $"{sortedProcesses.Count} processes";
-        HeaviestProcessText = $"{heaviestProcess.ProcessName} · {heaviestProcess.MemoryUsageMB:F0} MB";
-
-        UpdateProcessAlert(heaviestProcess.MemoryUsageMB);
-    }
-
-    private void UpdateProcessAlert(double heaviestProcessMemoryMb)
-    {
-        if (heaviestProcessMemoryMb >= 2000)
-        {
-            ProcessAlertText = "Heavy";
-            ProcessAlertBrush = Brushes.IndianRed;
-            return;
-        }
-
-        if (heaviestProcessMemoryMb >= 1000)
-        {
-            ProcessAlertText = "High";
-            ProcessAlertBrush = Brushes.Gold;
-            return;
-        }
-
-        ProcessAlertText = "Normal";
-        ProcessAlertBrush = Brushes.LightGreen;
     }
 
     private void UpdateDisks(SystemStats stats)
@@ -749,172 +473,5 @@ public class DashboardViewModel : BaseViewModel
         {
             cpuValues.RemoveAt(0);
         }
-    }
-}
-
-public class ProcessListItem
-{
-    public string PositionText { get; }
-    public string ProcessName { get; }
-    public int ProcessId { get; }
-    public string MemoryUsageText { get; }
-    public double MemoryUsageBarValue { get; }
-    public string MemoryLevelText { get; }
-    public Brush MemoryUsageBrush { get; }
-
-    private ProcessListItem(
-        string positionText,
-        string processName,
-        int processId,
-        string memoryUsageText,
-        double memoryUsageBarValue,
-        string memoryLevelText,
-        Brush memoryUsageBrush)
-    {
-        PositionText = positionText;
-        ProcessName = processName;
-        ProcessId = processId;
-        MemoryUsageText = memoryUsageText;
-        MemoryUsageBarValue = memoryUsageBarValue;
-        MemoryLevelText = memoryLevelText;
-        MemoryUsageBrush = memoryUsageBrush;
-    }
-
-    public static ProcessListItem Create(
-        int position,
-        string processName,
-        int processId,
-        double memoryUsageMb,
-        double highestMemoryUsageMb)
-    {
-        double barValue = highestMemoryUsageMb <= 0
-            ? 0
-            : Math.Min(100, memoryUsageMb / highestMemoryUsageMb * 100);
-
-        string memoryLevelText;
-        Brush memoryUsageBrush;
-
-        if (memoryUsageMb >= 2000)
-        {
-            memoryLevelText = "HEAVY";
-            memoryUsageBrush = Brushes.IndianRed;
-        }
-        else if (memoryUsageMb >= 1000)
-        {
-            memoryLevelText = "HIGH";
-            memoryUsageBrush = Brushes.Gold;
-        }
-        else if (memoryUsageMb >= 500)
-        {
-            memoryLevelText = "MEDIUM";
-            memoryUsageBrush = Brushes.LightSkyBlue;
-        }
-        else
-        {
-            memoryLevelText = "LOW";
-            memoryUsageBrush = Brushes.LightGreen;
-        }
-
-        return new ProcessListItem(
-            positionText: $"#{position}",
-            processName: string.IsNullOrWhiteSpace(processName) ? "Unknown" : processName,
-            processId: processId,
-            memoryUsageText: $"{memoryUsageMb:F1} MB",
-            memoryUsageBarValue: barValue,
-            memoryLevelText: memoryLevelText,
-            memoryUsageBrush: memoryUsageBrush);
-    }
-}
-
-public class HistoryListItem
-{
-    public string PositionText { get; }
-    public string CreatedAtText { get; }
-    public string CpuUsageText { get; }
-    public double CpuUsageBarValue { get; }
-    public Brush CpuUsageBrush { get; }
-    public string MemoryUsageText { get; }
-    public double MemoryUsageBarValue { get; }
-    public Brush MemoryUsageBrush { get; }
-    public string LevelText { get; }
-    public Brush LevelBrush { get; }
-
-    private HistoryListItem(
-        string positionText,
-        string createdAtText,
-        string cpuUsageText,
-        double cpuUsageBarValue,
-        Brush cpuUsageBrush,
-        string memoryUsageText,
-        double memoryUsageBarValue,
-        Brush memoryUsageBrush,
-        string levelText,
-        Brush levelBrush)
-    {
-        PositionText = positionText;
-        CreatedAtText = createdAtText;
-        CpuUsageText = cpuUsageText;
-        CpuUsageBarValue = cpuUsageBarValue;
-        CpuUsageBrush = cpuUsageBrush;
-        MemoryUsageText = memoryUsageText;
-        MemoryUsageBarValue = memoryUsageBarValue;
-        MemoryUsageBrush = memoryUsageBrush;
-        LevelText = levelText;
-        LevelBrush = levelBrush;
-    }
-
-    public static HistoryListItem Create(int position, SystemStatsHistoryDto item)
-    {
-        double memoryUsagePercent = item.TotalMemoryMb > 0
-            ? item.UsedMemoryMb / item.TotalMemoryMb * 100
-            : 0;
-
-        double highestUsage = Math.Max(item.CpuUsage, memoryUsagePercent);
-
-        string levelText;
-        Brush levelBrush;
-
-        if (highestUsage >= 85)
-        {
-            levelText = "CRITICAL";
-            levelBrush = Brushes.IndianRed;
-        }
-        else if (highestUsage >= 70)
-        {
-            levelText = "WARNING";
-            levelBrush = Brushes.Gold;
-        }
-        else
-        {
-            levelText = "NORMAL";
-            levelBrush = Brushes.LightGreen;
-        }
-
-        return new HistoryListItem(
-            positionText: $"#{position}",
-            createdAtText: item.CreatedAt.ToString("HH:mm:ss"),
-            cpuUsageText: $"{item.CpuUsage:F1}%",
-            cpuUsageBarValue: Math.Clamp(item.CpuUsage, 0, 100),
-            cpuUsageBrush: GetUsageBrush(item.CpuUsage),
-            memoryUsageText: $"{memoryUsagePercent:F1}%",
-            memoryUsageBarValue: Math.Clamp(memoryUsagePercent, 0, 100),
-            memoryUsageBrush: GetUsageBrush(memoryUsagePercent),
-            levelText: levelText,
-            levelBrush: levelBrush);
-    }
-
-    private static Brush GetUsageBrush(double usagePercent)
-    {
-        if (usagePercent >= 85)
-        {
-            return Brushes.IndianRed;
-        }
-
-        if (usagePercent >= 70)
-        {
-            return Brushes.Gold;
-        }
-
-        return Brushes.LightGreen;
     }
 }

@@ -44,7 +44,7 @@
                             VerticalAlignment="Center"/>
 
                     <Button Grid.Column="3"
-                            Content="{Binding DiagnosticReportHistoryButtonText}"
+                            Content="{Binding Reports.DiagnosticReportHistoryButtonText}"
                             Command="{Binding RefreshDiagnosticReportsCommand}"
                             Style="{StaticResource PrimaryButtonStyle}"
                             MinWidth="155"
@@ -64,7 +64,7 @@
                             <TextBlock Text="REPORTS"
                                        Style="{StaticResource HeaderTextStyle}"/>
 
-                            <TextBlock Text="{Binding DiagnosticReportHistoryCountText}"
+                            <TextBlock Text="{Binding Reports.DiagnosticReportHistoryCountText}"
                                        Style="{StaticResource ValueTextStyle}"/>
                         </StackPanel>
                     </Border>
@@ -75,7 +75,7 @@
                             <TextBlock Text="LATEST REPORT"
                                        Style="{StaticResource HeaderTextStyle}"/>
 
-                            <TextBlock Text="{Binding LatestDiagnosticReportTimeText}"
+                            <TextBlock Text="{Binding Reports.LatestDiagnosticReportTimeText}"
                                        Style="{StaticResource ValueTextStyle}"/>
                         </StackPanel>
                     </Border>
@@ -87,8 +87,8 @@
                             <TextBlock Text="LATEST STATUS"
                                        Style="{StaticResource HeaderTextStyle}"/>
 
-                            <TextBlock Text="{Binding LatestDiagnosticReportStatusText}"
-                                       Foreground="{Binding LatestDiagnosticReportStatusBrush}"
+                            <TextBlock Text="{Binding Reports.LatestDiagnosticReportStatusText}"
+                                       Foreground="{Binding Reports.LatestDiagnosticReportStatusBrush}"
                                        Style="{StaticResource ValueTextStyle}"/>
                         </StackPanel>
                     </Border>
@@ -131,7 +131,7 @@
                 <ScrollViewer Grid.Row="6"
                               VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled">
-                    <ItemsControl ItemsSource="{Binding DiagnosticReportRows}">
+                    <ItemsControl ItemsSource="{Binding Reports.DiagnosticReportRows}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Border Background="#10172A"

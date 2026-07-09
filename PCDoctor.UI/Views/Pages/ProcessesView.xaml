@@ -40,7 +40,7 @@
                             <TextBlock Text="MONITORED"
                                        Style="{StaticResource HeaderTextStyle}"/>
 
-                            <TextBlock Text="{Binding Dashboard.ProcessCountText}"
+                            <TextBlock Text="{Binding Processes.ProcessCountText}"
                                        Style="{StaticResource ValueTextStyle}"/>
                         </StackPanel>
                     </Border>
@@ -51,7 +51,7 @@
                             <TextBlock Text="HEAVIEST PROCESS"
                                        Style="{StaticResource HeaderTextStyle}"/>
 
-                            <TextBlock Text="{Binding Dashboard.HeaviestProcessText}"
+                            <TextBlock Text="{Binding Processes.HeaviestProcessText}"
                                        Style="{StaticResource ValueTextStyle}"/>
                         </StackPanel>
                     </Border>
@@ -63,8 +63,8 @@
                             <TextBlock Text="MEMORY PRESSURE"
                                        Style="{StaticResource HeaderTextStyle}"/>
 
-                            <TextBlock Text="{Binding Dashboard.ProcessAlertText}"
-                                       Foreground="{Binding Dashboard.ProcessAlertBrush}"
+                            <TextBlock Text="{Binding Processes.ProcessAlertText}"
+                                       Foreground="{Binding Processes.ProcessAlertBrush}"
                                        Style="{StaticResource ValueTextStyle}"/>
                         </StackPanel>
                     </Border>
@@ -112,7 +112,7 @@
                 <ScrollViewer Grid.Row="4"
                               VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled">
-                    <ItemsControl ItemsSource="{Binding Dashboard.ProcessRows}">
+                    <ItemsControl ItemsSource="{Binding Processes.ProcessRows}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Border Background="#10172A"

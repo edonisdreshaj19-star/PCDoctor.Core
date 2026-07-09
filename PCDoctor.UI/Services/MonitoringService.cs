@@ -25,10 +25,10 @@ public class MonitoringService
     {
         SystemStats stats = monitor.GetStats();
 
+        await SendStatsIfNeededAsync(stats);
+
         List<SystemStatsHistoryDto> history = await apiService.GetHistoryAsync();
         List<DiagnosticMessageDto> diagnostics = await apiService.GetDiagnosticsAsync();
-
-        await SendStatsIfNeededAsync(stats);
 
         return new MonitoringResult
         {

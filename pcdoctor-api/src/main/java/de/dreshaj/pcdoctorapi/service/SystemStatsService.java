@@ -1,6 +1,7 @@
 package de.dreshaj.pcdoctorapi.service;
 
 import de.dreshaj.pcdoctorapi.dto.SystemStatsDto;
+import de.dreshaj.pcdoctorapi.dto.SystemStatsResponseDto;
 import de.dreshaj.pcdoctorapi.model.DeviceEntity;
 import de.dreshaj.pcdoctorapi.model.SystemStatsEntity;
 import de.dreshaj.pcdoctorapi.repository.SystemStatsRepository;
@@ -36,13 +37,33 @@ public class SystemStatsService {
         systemStatsRepository.save(entity);
     }
 
-    public SystemStatsEntity getLatestStats(Long deviceId) {
+    public SystemStatsResponseDto getLatestStats(Long deviceId) {
+        SystemStatsEntity latestStats = getLatestStatsEntity(deviceId);
+
+        return mapToResponseDto(latestStats);
+    }
+
+    public List<SystemStatsResponseDto> getHistory(Long deviceId) {
+        return systemStatsRepository
+                .findTop50ByDeviceIdOrderByCreatedAtDesc(deviceId)
+                .stream()
+                .map(this::mapToResponseDto)
+                .toList();
+    }
+
+    private SystemStatsEntity getLatestStatsEntity(Long deviceId) {
         return systemStatsRepository
                 .findTop1ByDeviceIdOrderByCreatedAtDesc(deviceId)
                 .orElseThrow(() -> new RuntimeException("No stats found for device with id: " + deviceId));
     }
 
-    public List<SystemStatsEntity> getHistory(Long deviceId) {
-        return systemStatsRepository.findTop50ByDeviceIdOrderByCreatedAtDesc(deviceId);
+    private SystemStatsResponseDto mapToResponseDto(SystemStatsEntity entity) {
+        return new SystemStatsResponseDto(
+                entity.getId(),
+                entity.getCpuUsage(),
+                entity.getUsedMemoryMb(),
+                entity.getTotalMemoryMb(),
+                entity.getCreatedAt()
+        );
     }
 }

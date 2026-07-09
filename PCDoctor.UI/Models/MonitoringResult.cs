@@ -10,4 +10,8 @@ public class MonitoringResult
     public List<SystemStatsHistoryDto> History { get; set; } = new();
 
     public List<DiagnosticMessageDto> Diagnostics { get; set; } = new();
+    
+    public bool IsApiAvailable { get; set; }
+
+    public DateTime? LastSuccessfulSyncAt { get; set; }
 }

@@ -14,17 +14,22 @@ namespace PCDoctor.UI.ViewModels;
 public class MainViewModel : BaseViewModel
 {
     private const int MaxCpuChartPoints = 30;
+
     private readonly DashboardFormatter formatter;
-    private CancellationTokenSource? monitoringCancellationTokenSource;
+    private readonly AppSettings settings;
+    private readonly MonitoringService monitoringService;
+    private readonly WindowService windowService;
     private readonly ObservableCollection<ObservablePoint> cpuPoints = new();
+
+    private CancellationTokenSource? monitoringCancellationTokenSource;
+
     public ObservableCollection<string> DiskItems { get; } = new();
     public ObservableCollection<string> ProcessItems { get; } = new();
     public ObservableCollection<string> HistoryItems { get; } = new();
     public ObservableCollection<string> DiagnosticItems { get; } = new();
-    private readonly WindowService windowService;
+
     public ICommand OpenSettingsCommand { get; }
-    private readonly AppSettings settings;
-    private readonly MonitoringService monitoringService;
+
     private string cpuUsageText = "0%";
     public string CpuUsageText
     {
@@ -68,15 +73,44 @@ public class MainViewModel : BaseViewModel
             OnPropertyChanged();
         }
     }
+
+    private string apiStatusText = "API: Unknown";
+    public string ApiStatusText
+    {
+        get => apiStatusText;
+        set
+        {
+            apiStatusText = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private string lastSyncText = "Last Sync: -";
+    public string LastSyncText
+    {
+        get => lastSyncText;
+        set
+        {
+            lastSyncText = value;
+            OnPropertyChanged();
+        }
+    }
+
     public ISeries[] CpuSeries { get; }
 
-    public MainViewModel(AppSettings settings, MonitoringService monitoringService, DashboardFormatter formatter, WindowService windowService)
+    public MainViewModel(
+        AppSettings settings,
+        MonitoringService monitoringService,
+        DashboardFormatter formatter,
+        WindowService windowService)
     {
         this.settings = settings;
         this.monitoringService = monitoringService;
         this.formatter = formatter;
         this.windowService = windowService;
+
         OpenSettingsCommand = new RelayCommand(windowService.OpenSettingsWindow);
+
         CpuSeries = new ISeries[]
         {
             new LineSeries<ObservablePoint>
@@ -87,9 +121,14 @@ public class MainViewModel : BaseViewModel
             }
         };
     }
-    
+
     public async void StartMonitoring()
     {
+        if (monitoringCancellationTokenSource != null)
+        {
+            return;
+        }
+
         monitoringCancellationTokenSource = new CancellationTokenSource();
         CancellationToken token = monitoringCancellationTokenSource.Token;
 
@@ -99,11 +138,7 @@ public class MainViewModel : BaseViewModel
             {
                 MonitoringResult result = await monitoringService.GetMonitoringResultAsync();
 
-                UpdateDashboard(
-                    result.Stats,
-                    result.History,
-                    result.Diagnostics
-                );
+                UpdateDashboard(result);
 
                 await Task.Delay(settings.RefreshIntervalSeconds * 1000, token);
             }
@@ -112,27 +147,38 @@ public class MainViewModel : BaseViewModel
         {
             // Monitoring stopped
         }
+        finally
+        {
+            monitoringCancellationTokenSource?.Dispose();
+            monitoringCancellationTokenSource = null;
+        }
     }
-    
-    private void UpdateDashboard(
-        SystemStats stats,
-        List<SystemStatsHistoryDto> history,
-        List<DiagnosticMessageDto> diagnostics)
+
+    private void UpdateDashboard(MonitoringResult result)
     {
+        SystemStats stats = result.Stats;
+
         CpuUsageText = $"{stats.CpuUsage:F1}%";
         CpuProgressValue = stats.CpuUsage;
 
         MemoryUsageText = formatter.FormatMemory(stats);
-
         MemoryProgressValue = formatter.CalculateMemoryUsagePercent(stats);
+
+        ApiStatusText = result.IsApiAvailable
+            ? "API: Connected"
+            : "API: Offline";
+
+        LastSyncText = result.LastSuccessfulSyncAt.HasValue
+            ? $"Last Sync: {result.LastSuccessfulSyncAt.Value:HH:mm:ss}"
+            : "Last Sync: -";
 
         UpdateDisks(stats);
         UpdateProcesses(stats);
-        UpdateHistory(history);
+        UpdateHistory(result.History);
         AddCpuPoint(stats.CpuUsage);
-        UpdateDiagnostics(diagnostics);
+        UpdateDiagnostics(result.Diagnostics);
     }
-    
+
     private void UpdateHistory(List<SystemStatsHistoryDto> history)
     {
         HistoryItems.Clear();
@@ -142,6 +188,7 @@ public class MainViewModel : BaseViewModel
             HistoryItems.Add(formatter.FormatHistory(item));
         }
     }
+
     private void UpdateDiagnostics(List<DiagnosticMessageDto> diagnostics)
     {
         DiagnosticItems.Clear();
@@ -151,6 +198,7 @@ public class MainViewModel : BaseViewModel
             DiagnosticItems.Add(formatter.FormatDiagnostic(diagnostic));
         }
     }
+
     private void UpdateProcesses(SystemStats stats)
     {
         ProcessItems.Clear();
@@ -160,6 +208,7 @@ public class MainViewModel : BaseViewModel
             ProcessItems.Add(formatter.FormatProcess(process));
         }
     }
+
     private void UpdateDisks(SystemStats stats)
     {
         DiskItems.Clear();
@@ -169,7 +218,8 @@ public class MainViewModel : BaseViewModel
             DiskItems.Add(formatter.FormatDisk(disk));
         }
     }
-    public void AddCpuPoint(double cpuUsage)
+
+    private void AddCpuPoint(double cpuUsage)
     {
         cpuPoints.Add(new ObservablePoint(cpuPoints.Count, cpuUsage));
 
@@ -178,6 +228,7 @@ public class MainViewModel : BaseViewModel
             cpuPoints.RemoveAt(0);
         }
     }
+
     public void StopMonitoring()
     {
         monitoringCancellationTokenSource?.Cancel();

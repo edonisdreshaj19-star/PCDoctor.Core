@@ -34,7 +34,9 @@ public class MonitoringService
         {
             Stats = stats,
             History = history,
-            Diagnostics = diagnostics
+            Diagnostics = diagnostics,
+            IsApiAvailable = apiService.IsApiAvailable,
+            LastSuccessfulSyncAt = apiService.LastSuccessfulSyncAt
         };
     }
     

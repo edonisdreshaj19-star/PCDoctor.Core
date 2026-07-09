@@ -8,10 +8,13 @@ namespace PCDoctor.Core.Services;
 
 public class ApiService
 {
-    private readonly HttpClient httpClient;
+   private readonly HttpClient httpClient;
     private readonly DeviceRegistrationService deviceRegistrationService;
 
     private DeviceRegistrationResponse? currentDevice;
+
+    public bool IsApiAvailable { get; private set; }
+    public DateTime? LastSuccessfulSyncAt { get; private set; }
 
     public ApiService(AppSettings settings)
     {
@@ -46,10 +49,15 @@ public class ApiService
             HttpResponseMessage response = await httpClient.SendAsync(request);
 
             response.EnsureSuccessStatusCode();
+
+            MarkApiAvailable();
+            LastSuccessfulSyncAt = DateTime.Now;
+
             Log.Information("System stats sent successfully for device {DeviceId}.", device.Id);
         }
         catch (Exception e)
         {
+            MarkApiUnavailable();
             Log.Error(e, "Failed to send system stats to API.");
         }
     }
@@ -65,11 +73,15 @@ public class ApiService
                     $"/api/devices/{device.Id}/system-stats/history"
                 );
 
+            MarkApiAvailable();
+
             return history ?? new List<SystemStatsHistoryDto>();
         }
         catch (Exception e)
         {
+            MarkApiUnavailable();
             Log.Error(e, "Failed to fetch system stats history.");
+
             return new List<SystemStatsHistoryDto>();
         }
     }
@@ -85,11 +97,15 @@ public class ApiService
                     $"/api/devices/{device.Id}/system-stats/diagnostics"
                 );
 
+            MarkApiAvailable();
+
             return diagnostics ?? new List<DiagnosticMessageDto>();
         }
         catch (Exception e)
         {
+            MarkApiUnavailable();
             Log.Error(e, "Failed to fetch diagnostics.");
+
             return new List<DiagnosticMessageDto>();
         }
     }
@@ -104,5 +120,15 @@ public class ApiService
         currentDevice = await deviceRegistrationService.GetOrRegisterDeviceAsync();
 
         return currentDevice;
+    }
+
+    private void MarkApiAvailable()
+    {
+        IsApiAvailable = true;
+    }
+
+    private void MarkApiUnavailable()
+    {
+        IsApiAvailable = false;
     }
 }

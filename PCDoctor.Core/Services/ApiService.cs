@@ -1,7 +1,9 @@
 ﻿using System.Net.Http.Json;
 using PCDoctor.Core.Models;
 using PCDoctor.Models;
+using PCDoctor.UI.Models;
 using Serilog;
+
 
 namespace PCDoctor.Core.Services;
 
@@ -44,11 +46,15 @@ public class ApiService
 
     public async Task SendSystemStatsAsync(SystemStats stats)
     {
+        DiskStats? primaryDisk = GetPrimaryDisk(stats);
+
         var dto = new
         {
             cpuUsage = stats.CpuUsage,
             usedMemoryMb = stats.UsedMemoryMB,
-            totalMemoryMb = stats.TotalMemoryMB
+            totalMemoryMb = stats.TotalMemoryMB,
+            usedDiskGb = primaryDisk?.UsedSpaceGB ?? 0,
+            totalDiskGb = primaryDisk?.TotalSpaceGB ?? 0
         };
 
         try
@@ -188,5 +194,24 @@ public class ApiService
 
             return null;
         }
+    }
+    
+    private static DiskStats? GetPrimaryDisk(SystemStats stats)
+    {
+        string? systemDrive = Path.GetPathRoot(Environment.SystemDirectory);
+
+        if (!string.IsNullOrWhiteSpace(systemDrive))
+        {
+            DiskStats? systemDisk = stats.Disks.FirstOrDefault(d =>
+                string.Equals(d.DriveName, systemDrive, StringComparison.OrdinalIgnoreCase)
+            );
+
+            if (systemDisk != null)
+            {
+                return systemDisk;
+            }
+        }
+
+        return stats.Disks.FirstOrDefault();
     }
 }

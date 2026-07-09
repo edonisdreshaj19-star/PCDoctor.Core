@@ -13,7 +13,6 @@ public class SettingsViewModel : BaseViewModel
     private readonly SettingsService settingsService;
     private readonly ApiService apiService;
 
-    public event Action<bool?>? CloseRequested;
     public event Func<string, string, bool>? ConfirmationRequested;
     public event Action<string, string>? NotificationRequested;
 
@@ -198,8 +197,6 @@ public class SettingsViewModel : BaseViewModel
             UpdateRuntimeStatus();
 
             SetSuccess("Settings saved. The API connection will refresh on the next sync.");
-
-            CloseRequested?.Invoke(true);
         }
         catch (Exception e)
         {
@@ -240,8 +237,6 @@ public class SettingsViewModel : BaseViewModel
             NotificationRequested?.Invoke(
                 "Device registration was reset successfully.",
                 "PCDoctor");
-
-            CloseRequested?.Invoke(true);
         }
         catch (Exception e)
         {

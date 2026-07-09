@@ -13,7 +13,6 @@ public partial class MainWindow : Window
     private readonly SystemMonitor monitor;
     private readonly ApiService apiService;
     private readonly SettingsService settingsService;
-    private readonly WindowService windowService;
     private readonly MainViewModel viewModel;
 
     public MainWindow()
@@ -25,7 +24,6 @@ public partial class MainWindow : Window
 
         monitor = new SystemMonitor();
         apiService = new ApiService(settings);
-        windowService = new WindowService(settings, settingsService, apiService);
 
         DashboardFormatter formatter = new();
 
@@ -40,8 +38,7 @@ public partial class MainWindow : Window
             settingsService,
             monitoringService,
             apiService,
-            formatter,
-            windowService
+            formatter
         );
 
         DataContext = viewModel;

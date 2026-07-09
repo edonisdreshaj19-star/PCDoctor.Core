@@ -1,8 +1,8 @@
-﻿using System.Windows.Input;
-using PCDoctor.Core.Models;
+﻿using PCDoctor.Core.Models;
 using PCDoctor.Core.Services;
 using PCDoctor.UI.Commands;
 using PCDoctor.UI.Services;
+using System.Windows.Input;
 
 namespace PCDoctor.UI.ViewModels;
 
@@ -20,7 +20,6 @@ public class MainViewModel : BaseViewModel
 
     public SettingsViewModel Settings { get; }
 
-    public ICommand OpenSettingsCommand { get; }
     public ICommand GenerateDiagnosticReportCommand { get; }
 
     public MainViewModel(
@@ -28,8 +27,7 @@ public class MainViewModel : BaseViewModel
         SettingsService settingsService,
         MonitoringService monitoringService,
         ApiService apiService,
-        DashboardFormatter formatter,
-        WindowService windowService)
+        DashboardFormatter formatter)
     {
         this.settings = settings;
         this.monitoringService = monitoringService;
@@ -38,7 +36,6 @@ public class MainViewModel : BaseViewModel
         Dashboard = new DashboardViewModel(formatter);
         Settings = new SettingsViewModel(settings, settingsService, apiService);
 
-        OpenSettingsCommand = new RelayCommand(windowService.OpenSettingsWindow);
         GenerateDiagnosticReportCommand = new RelayCommand(() => _ = GenerateDiagnosticReportAsync());
     }
 

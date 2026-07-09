@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Json;
 using PCDoctor.Core.Models;
 using Serilog;
+using System.Runtime.InteropServices;
 
 namespace PCDoctor.Core.Services;
 
@@ -27,7 +28,8 @@ public class DeviceRegistrationService
 
         RegisterDeviceRequest request = new()
         {
-            DeviceName = Environment.MachineName
+            DeviceName = Environment.MachineName,
+            OperatingSystem = RuntimeInformation.OSDescription
         };
 
         HttpResponseMessage response =

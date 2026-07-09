@@ -18,11 +18,14 @@ public class MainViewModel : BaseViewModel
 
     public DashboardViewModel Dashboard { get; }
 
+    public SettingsViewModel Settings { get; }
+
     public ICommand OpenSettingsCommand { get; }
     public ICommand GenerateDiagnosticReportCommand { get; }
 
     public MainViewModel(
         AppSettings settings,
+        SettingsService settingsService,
         MonitoringService monitoringService,
         ApiService apiService,
         DashboardFormatter formatter,
@@ -33,6 +36,7 @@ public class MainViewModel : BaseViewModel
         this.apiService = apiService;
 
         Dashboard = new DashboardViewModel(formatter);
+        Settings = new SettingsViewModel(settings, settingsService, apiService);
 
         OpenSettingsCommand = new RelayCommand(windowService.OpenSettingsWindow);
         GenerateDiagnosticReportCommand = new RelayCommand(() => _ = GenerateDiagnosticReportAsync());
@@ -156,6 +160,7 @@ public class MainViewModel : BaseViewModel
                 var result = await monitoringService.GetMonitoringResultAsync();
 
                 Dashboard.Update(result);
+                Settings.UpdateRuntimeStatus();
 
                 await Task.Delay(settings.RefreshIntervalSeconds * 1000, token);
             }
@@ -189,6 +194,7 @@ public class MainViewModel : BaseViewModel
         {
             var report = await apiService.GenerateDiagnosticReportAsync();
             Dashboard.UpdateDiagnosticReport(report);
+            Settings.UpdateRuntimeStatus();
         }
         finally
         {

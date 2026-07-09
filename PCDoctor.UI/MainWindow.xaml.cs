@@ -37,6 +37,7 @@ public partial class MainWindow : Window
 
         viewModel = new MainViewModel(
             settings,
+            settingsService,
             monitoringService,
             apiService,
             formatter,

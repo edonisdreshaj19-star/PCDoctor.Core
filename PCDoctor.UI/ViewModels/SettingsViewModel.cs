@@ -1,6 +1,8 @@
 ﻿using System.Windows.Input;
+using System.Windows.Media;
 using PCDoctor.Core.Models;
 using PCDoctor.Core.Services;
+using PCDoctor.Models;
 using PCDoctor.UI.Commands;
 
 namespace PCDoctor.UI.ViewModels;
@@ -16,50 +18,84 @@ public class SettingsViewModel : BaseViewModel
     public event Action<string, string>? NotificationRequested;
 
     public ICommand SaveCommand { get; }
+    public ICommand ResetToDefaultsCommand { get; }
     public ICommand ResetDeviceRegistrationCommand { get; }
 
     private string apiBaseUrl;
     public string ApiBaseUrl
     {
         get => apiBaseUrl;
-        set
-        {
-            apiBaseUrl = value;
-            OnPropertyChanged();
-        }
+        set => SetProperty(ref apiBaseUrl, value);
     }
 
     private string refreshIntervalSeconds;
     public string RefreshIntervalSeconds
     {
         get => refreshIntervalSeconds;
-        set
-        {
-            refreshIntervalSeconds = value;
-            OnPropertyChanged();
-        }
+        set => SetProperty(ref refreshIntervalSeconds, value);
     }
 
     private string apiSendIntervalSeconds;
     public string ApiSendIntervalSeconds
     {
         get => apiSendIntervalSeconds;
-        set
-        {
-            apiSendIntervalSeconds = value;
-            OnPropertyChanged();
-        }
+        set => SetProperty(ref apiSendIntervalSeconds, value);
     }
 
     private string statusMessage = string.Empty;
     public string StatusMessage
     {
         get => statusMessage;
-        set
-        {
-            statusMessage = value;
-            OnPropertyChanged();
-        }
+        set => SetProperty(ref statusMessage, value);
+    }
+
+    private Brush statusBrush = Brushes.LightGreen;
+    public Brush StatusBrush
+    {
+        get => statusBrush;
+        set => SetProperty(ref statusBrush, value);
+    }
+
+    private string apiStatusText = "Unknown";
+    public string ApiStatusText
+    {
+        get => apiStatusText;
+        set => SetProperty(ref apiStatusText, value);
+    }
+
+    private Brush apiStatusBrush = Brushes.Gray;
+    public Brush ApiStatusBrush
+    {
+        get => apiStatusBrush;
+        set => SetProperty(ref apiStatusBrush, value);
+    }
+
+    private string lastSuccessfulSyncText = "-";
+    public string LastSuccessfulSyncText
+    {
+        get => lastSuccessfulSyncText;
+        set => SetProperty(ref lastSuccessfulSyncText, value);
+    }
+
+    private string deviceNameText = "Not registered";
+    public string DeviceNameText
+    {
+        get => deviceNameText;
+        set => SetProperty(ref deviceNameText, value);
+    }
+
+    private string deviceIdText = "-";
+    public string DeviceIdText
+    {
+        get => deviceIdText;
+        set => SetProperty(ref deviceIdText, value);
+    }
+
+    private string operatingSystemText = "-";
+    public string OperatingSystemText
+    {
+        get => operatingSystemText;
+        set => SetProperty(ref operatingSystemText, value);
     }
 
     public SettingsViewModel(
@@ -76,7 +112,48 @@ public class SettingsViewModel : BaseViewModel
         apiSendIntervalSeconds = settings.ApiSendIntervalSeconds.ToString();
 
         SaveCommand = new RelayCommand(SaveSettings);
+        ResetToDefaultsCommand = new RelayCommand(ResetToDefaults);
         ResetDeviceRegistrationCommand = new RelayCommand(ResetDeviceRegistration);
+
+        UpdateRuntimeStatus();
+    }
+
+    public void UpdateRuntimeStatus()
+    {
+        if (apiService.IsApiAvailable)
+        {
+            ApiStatusText = "Connected";
+            ApiStatusBrush = Brushes.LightGreen;
+        }
+        else
+        {
+            ApiStatusText = "Offline";
+            ApiStatusBrush = Brushes.IndianRed;
+        }
+
+        LastSuccessfulSyncText = apiService.LastSuccessfulSyncAt.HasValue
+            ? apiService.LastSuccessfulSyncAt.Value.ToString("HH:mm:ss")
+            : "-";
+
+        DeviceRegistrationResponse? currentDevice = apiService.CurrentDevice;
+
+        if (currentDevice == null)
+        {
+            DeviceNameText = "Not registered";
+            DeviceIdText = "-";
+            OperatingSystemText = "-";
+            return;
+        }
+
+        DeviceNameText = string.IsNullOrWhiteSpace(currentDevice.DeviceName)
+            ? "Unknown device"
+            : currentDevice.DeviceName;
+
+        DeviceIdText = currentDevice.Id.ToString();
+
+        OperatingSystemText = string.IsNullOrWhiteSpace(currentDevice.OperatingSystem)
+            ? "Unknown OS"
+            : currentDevice.OperatingSystem;
     }
 
     private void SaveSettings()
@@ -87,36 +164,58 @@ public class SettingsViewModel : BaseViewModel
 
         if (string.IsNullOrWhiteSpace(trimmedApiBaseUrl))
         {
-            StatusMessage = "API Base URL is required.";
+            SetError("API Base URL is required.");
             return;
         }
 
         if (!Uri.TryCreate(trimmedApiBaseUrl, UriKind.Absolute, out _))
         {
-            StatusMessage = "API Base URL must be a valid URL.";
+            SetError("API Base URL must be a valid URL.");
             return;
         }
 
         if (!int.TryParse(RefreshIntervalSeconds, out int refreshInterval) || refreshInterval <= 0)
         {
-            StatusMessage = "Refresh interval must be a positive number.";
+            SetError("Refresh interval must be a positive number.");
             return;
         }
 
         if (!int.TryParse(ApiSendIntervalSeconds, out int apiSendInterval) || apiSendInterval <= 0)
         {
-            StatusMessage = "API upload interval must be a positive number.";
+            SetError("API upload interval must be a positive number.");
             return;
         }
 
-        settings.ApiBaseUrl = trimmedApiBaseUrl;
-        settings.RefreshIntervalSeconds = refreshInterval;
-        settings.ApiSendIntervalSeconds = apiSendInterval;
+        try
+        {
+            settings.ApiBaseUrl = trimmedApiBaseUrl;
+            settings.RefreshIntervalSeconds = refreshInterval;
+            settings.ApiSendIntervalSeconds = apiSendInterval;
 
-        settingsService.SaveSettings(settings);
-        apiService.UpdateApiBaseUrl(settings.ApiBaseUrl);
+            settingsService.SaveSettings(settings);
+            apiService.UpdateApiBaseUrl(settings.ApiBaseUrl);
 
-        CloseRequested?.Invoke(true);
+            UpdateRuntimeStatus();
+
+            SetSuccess("Settings saved. The API connection will refresh on the next sync.");
+
+            CloseRequested?.Invoke(true);
+        }
+        catch (Exception e)
+        {
+            SetError($"Settings could not be saved: {e.Message}");
+        }
+    }
+
+    private void ResetToDefaults()
+    {
+        AppSettings defaultSettings = new();
+
+        ApiBaseUrl = defaultSettings.ApiBaseUrl;
+        RefreshIntervalSeconds = defaultSettings.RefreshIntervalSeconds.ToString();
+        ApiSendIntervalSeconds = defaultSettings.ApiSendIntervalSeconds.ToString();
+
+        SetInfo("Default values loaded. Click Save to apply them.");
     }
 
     private async void ResetDeviceRegistration()
@@ -130,12 +229,41 @@ public class SettingsViewModel : BaseViewModel
             return;
         }
 
-        await apiService.ResetDeviceRegistrationAsync();
+        try
+        {
+            await apiService.ResetDeviceRegistrationAsync();
 
-        NotificationRequested?.Invoke(
-            "Device registration was reset successfully.",
-            "PCDoctor");
+            UpdateRuntimeStatus();
 
-        CloseRequested?.Invoke(true);
+            SetSuccess("Device registration was reset successfully.");
+
+            NotificationRequested?.Invoke(
+                "Device registration was reset successfully.",
+                "PCDoctor");
+
+            CloseRequested?.Invoke(true);
+        }
+        catch (Exception e)
+        {
+            SetError($"Device registration could not be reset: {e.Message}");
+        }
+    }
+
+    private void SetError(string message)
+    {
+        StatusMessage = message;
+        StatusBrush = Brushes.IndianRed;
+    }
+
+    private void SetSuccess(string message)
+    {
+        StatusMessage = message;
+        StatusBrush = Brushes.LightGreen;
+    }
+
+    private void SetInfo(string message)
+    {
+        StatusMessage = message;
+        StatusBrush = Brushes.LightSkyBlue;
     }
 }

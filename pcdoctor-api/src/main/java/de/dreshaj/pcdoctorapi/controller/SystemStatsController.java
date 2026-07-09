@@ -22,7 +22,7 @@ public class SystemStatsController {
 
     @PostMapping("/api/system-stats")
     public String receiveStats(
-            @RequestHeader(value = "X-Device-Token", required = false) String deviceToken,
+            @RequestHeader(value = "X-Device-Token") String deviceToken,
             @RequestBody SystemStatsDto stats
     ) {
         systemStatsService.saveStats(deviceToken, stats);

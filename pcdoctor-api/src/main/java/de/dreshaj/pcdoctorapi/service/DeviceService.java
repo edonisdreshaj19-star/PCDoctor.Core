@@ -20,6 +20,10 @@ public class DeviceService {
     }
 
     public DeviceEntity registerDevice(DeviceRegisterDto dto) {
+        if (dto == null || dto.getDeviceName() == null || dto.getDeviceName().isBlank()) {
+            throw new IllegalArgumentException("Device name is required.");
+        }
+
         DeviceEntity device = new DeviceEntity();
         device.setDeviceName(dto.getDeviceName());
         device.setDeviceToken(dto.getDeviceToken());

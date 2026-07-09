@@ -24,6 +24,8 @@ public class SystemStatsService {
 
     @Transactional
     public void saveStats(String deviceToken, SystemStatsDto stats) {
+        validateStatsRequest(deviceToken, stats);
+
         DeviceEntity device = deviceService.getDeviceByToken(deviceToken);
 
         SystemStatsEntity entity = new SystemStatsEntity();
@@ -65,5 +67,31 @@ public class SystemStatsService {
                 entity.getTotalMemoryMb(),
                 entity.getCreatedAt()
         );
+    }
+
+    private void validateStatsRequest(String deviceToken, SystemStatsDto stats) {
+        if (deviceToken == null || deviceToken.isBlank()) {
+            throw new IllegalArgumentException("Device token is required.");
+        }
+
+        if (stats == null) {
+            throw new IllegalArgumentException("System stats are required.");
+        }
+
+        if (stats.getCpuUsage() < 0 || stats.getCpuUsage() > 100) {
+            throw new IllegalArgumentException("CPU usage must be between 0 and 100.");
+        }
+
+        if (stats.getUsedMemoryMb() < 0) {
+            throw new IllegalArgumentException("Used memory must not be negative.");
+        }
+
+        if (stats.getTotalMemoryMb() <= 0) {
+            throw new IllegalArgumentException("Total memory must be greater than 0.");
+        }
+
+        if (stats.getUsedMemoryMb() > stats.getTotalMemoryMb()) {
+            throw new IllegalArgumentException("Used memory must not be greater than total memory.");
+        }
     }
 }

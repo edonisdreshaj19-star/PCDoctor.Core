@@ -81,9 +81,19 @@ public class SettingsViewModel : BaseViewModel
 
     private void SaveSettings()
     {
-        if (string.IsNullOrWhiteSpace(ApiBaseUrl))
+        StatusMessage = string.Empty;
+
+        string trimmedApiBaseUrl = ApiBaseUrl.Trim();
+
+        if (string.IsNullOrWhiteSpace(trimmedApiBaseUrl))
         {
             StatusMessage = "API Base URL is required.";
+            return;
+        }
+
+        if (!Uri.TryCreate(trimmedApiBaseUrl, UriKind.Absolute, out _))
+        {
+            StatusMessage = "API Base URL must be a valid URL.";
             return;
         }
 
@@ -99,11 +109,12 @@ public class SettingsViewModel : BaseViewModel
             return;
         }
 
-        settings.ApiBaseUrl = ApiBaseUrl.Trim();
+        settings.ApiBaseUrl = trimmedApiBaseUrl;
         settings.RefreshIntervalSeconds = refreshInterval;
         settings.ApiSendIntervalSeconds = apiSendInterval;
 
         settingsService.SaveSettings(settings);
+        apiService.UpdateApiBaseUrl(settings.ApiBaseUrl);
 
         CloseRequested?.Invoke(true);
     }

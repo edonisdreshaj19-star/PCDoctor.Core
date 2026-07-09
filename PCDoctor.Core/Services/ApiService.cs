@@ -1,17 +1,19 @@
-﻿using PCDoctor.Models;
-
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using PCDoctor.Core.Models;
+using PCDoctor.Models;
 using Serilog;
 
 namespace PCDoctor.Core.Services;
 
 public class ApiService
 {
-   private readonly HttpClient httpClient;
-    private readonly DeviceRegistrationService deviceRegistrationService;
+    private readonly DeviceTokenStore deviceTokenStore = new();
+
+    private HttpClient httpClient;
+    private DeviceRegistrationService deviceRegistrationService;
 
     private DeviceRegistrationResponse? currentDevice;
+
     public DeviceRegistrationResponse? CurrentDevice => currentDevice;
 
     public bool IsApiAvailable { get; private set; }
@@ -19,13 +21,25 @@ public class ApiService
 
     public ApiService(AppSettings settings)
     {
-        httpClient = new HttpClient
-        {
-            BaseAddress = new Uri(settings.ApiBaseUrl)
-        };
-
-        DeviceTokenStore deviceTokenStore = new();
+        httpClient = CreateHttpClient(settings.ApiBaseUrl);
         deviceRegistrationService = new DeviceRegistrationService(httpClient, deviceTokenStore);
+    }
+
+    public void UpdateApiBaseUrl(string apiBaseUrl)
+    {
+        if (!Uri.TryCreate(apiBaseUrl, UriKind.Absolute, out _))
+        {
+            throw new ArgumentException("API base URL must be a valid absolute URL.");
+        }
+
+        httpClient = CreateHttpClient(apiBaseUrl);
+        deviceRegistrationService = new DeviceRegistrationService(httpClient, deviceTokenStore);
+
+        currentDevice = null;
+        IsApiAvailable = false;
+        LastSuccessfulSyncAt = null;
+
+        Log.Information("API base URL updated to {ApiBaseUrl}.", apiBaseUrl);
     }
 
     public async Task SendSystemStatsAsync(SystemStats stats)
@@ -111,6 +125,17 @@ public class ApiService
         }
     }
 
+    public async Task ResetDeviceRegistrationAsync()
+    {
+        await deviceRegistrationService.ResetDeviceRegistrationAsync();
+
+        currentDevice = null;
+        IsApiAvailable = false;
+        LastSuccessfulSyncAt = null;
+
+        Log.Information("API service device registration cache was cleared.");
+    }
+
     private async Task<DeviceRegistrationResponse> GetCurrentDeviceAsync()
     {
         if (currentDevice != null)
@@ -123,6 +148,14 @@ public class ApiService
         return currentDevice;
     }
 
+    private static HttpClient CreateHttpClient(string apiBaseUrl)
+    {
+        return new HttpClient
+        {
+            BaseAddress = new Uri(apiBaseUrl)
+        };
+    }
+
     private void MarkApiAvailable()
     {
         IsApiAvailable = true;
@@ -131,13 +164,5 @@ public class ApiService
     private void MarkApiUnavailable()
     {
         IsApiAvailable = false;
-    }
-    
-    public async Task ResetDeviceRegistrationAsync()
-    {
-        await deviceRegistrationService.ResetDeviceRegistrationAsync();
-        currentDevice = null;
-        IsApiAvailable = false;
-        LastSuccessfulSyncAt = null;
     }
 }

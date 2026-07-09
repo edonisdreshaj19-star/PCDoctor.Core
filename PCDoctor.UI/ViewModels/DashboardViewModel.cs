@@ -17,13 +17,20 @@ namespace PCDoctor.UI.ViewModels;
 public class DashboardViewModel : BaseViewModel
 {
     private const int MaxCpuChartPoints = 30;
+    private const int ProcessPreviewCount = 3;
+    private const int HistoryPreviewCount = 3;
+    private const int FullHistoryCount = 25;
+    private const int DiskPreviewCount = 3;
 
     private readonly DashboardFormatter formatter;
     private readonly ObservableCollection<double> cpuValues = new();
 
     public ObservableCollection<string> DiskItems { get; } = new();
+    public ObservableCollection<string> DiskPreviewItems { get; } = new();
     public ObservableCollection<string> ProcessItems { get; } = new();
+    public ObservableCollection<string> ProcessPreviewItems { get; } = new();
     public ObservableCollection<string> HistoryItems { get; } = new();
+    public ObservableCollection<string> HistoryPreviewItems { get; } = new();
     public ObservableCollection<string> DiagnosticItems { get; } = new();
     public ObservableCollection<string> HealthReasonItems { get; } = new();
     public ObservableCollection<string> HealthRecommendationItems { get; } = new();
@@ -248,6 +255,7 @@ public class DashboardViewModel : BaseViewModel
             }
         };
 
+        SetInitialPreviewState();
         UpdateDiagnosticReport(null);
     }
 
@@ -323,6 +331,18 @@ public class DashboardViewModel : BaseViewModel
         DiagnosticReportButtonText = isLoading ? "Running..." : "Run Diagnosis";
     }
 
+    private void SetInitialPreviewState()
+    {
+        DiskItems.Add("Waiting for disk data...");
+        DiskPreviewItems.Add("Waiting for disk data...");
+
+        ProcessItems.Add("Waiting for process data...");
+        ProcessPreviewItems.Add("Waiting for process data...");
+
+        HistoryItems.Add("Waiting for history data...");
+        HistoryPreviewItems.Add("Waiting for history data...");
+    }
+
     private void UpdateApiStatus(MonitoringResult result)
     {
         if (result.IsApiAvailable)
@@ -361,10 +381,28 @@ public class DashboardViewModel : BaseViewModel
     private void UpdateHistory(List<SystemStatsHistoryDto> history)
     {
         HistoryItems.Clear();
+        HistoryPreviewItems.Clear();
 
-        foreach (SystemStatsHistoryDto item in history.Take(10))
+        List<string> formattedHistory = history
+            .Take(FullHistoryCount)
+            .Select(formatter.FormatHistory)
+            .ToList();
+
+        if (formattedHistory.Count == 0)
         {
-            HistoryItems.Add(formatter.FormatHistory(item));
+            HistoryItems.Add("No history entries available yet.");
+            HistoryPreviewItems.Add("No recent history available yet.");
+            return;
+        }
+
+        foreach (string item in formattedHistory)
+        {
+            HistoryItems.Add(item);
+        }
+
+        foreach (string item in formattedHistory.Take(HistoryPreviewCount))
+        {
+            HistoryPreviewItems.Add(item);
         }
     }
 
@@ -478,20 +516,54 @@ public class DashboardViewModel : BaseViewModel
     private void UpdateProcesses(SystemStats stats)
     {
         ProcessItems.Clear();
+        ProcessPreviewItems.Clear();
 
-        foreach (ProcessStats process in stats.TopProcesses)
+        List<string> formattedProcesses = stats.TopProcesses
+            .Select(formatter.FormatProcess)
+            .ToList();
+
+        if (formattedProcesses.Count == 0)
         {
-            ProcessItems.Add(formatter.FormatProcess(process));
+            ProcessItems.Add("No process data available yet.");
+            ProcessPreviewItems.Add("No process data available yet.");
+            return;
+        }
+
+        foreach (string item in formattedProcesses)
+        {
+            ProcessItems.Add(item);
+        }
+
+        foreach (string item in formattedProcesses.Take(ProcessPreviewCount))
+        {
+            ProcessPreviewItems.Add(item);
         }
     }
 
     private void UpdateDisks(SystemStats stats)
     {
         DiskItems.Clear();
+        DiskPreviewItems.Clear();
 
-        foreach (DiskStats disk in stats.Disks)
+        List<string> formattedDisks = stats.Disks
+            .Select(formatter.FormatDisk)
+            .ToList();
+
+        if (formattedDisks.Count == 0)
         {
-            DiskItems.Add(formatter.FormatDisk(disk));
+            DiskItems.Add("No disk data available yet.");
+            DiskPreviewItems.Add("No disk data available yet.");
+            return;
+        }
+
+        foreach (string item in formattedDisks)
+        {
+            DiskItems.Add(item);
+        }
+
+        foreach (string item in formattedDisks.Take(DiskPreviewCount))
+        {
+            DiskPreviewItems.Add(item);
         }
     }
 

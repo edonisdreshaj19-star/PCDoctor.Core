@@ -157,6 +157,13 @@ public class DashboardViewModel : BaseViewModel
         set => SetProperty(ref diagnosticReportScoreText, value);
     }
 
+    private double diagnosticReportProgressValue;
+    public double DiagnosticReportProgressValue
+    {
+        get => diagnosticReportProgressValue;
+        set => SetProperty(ref diagnosticReportProgressValue, value);
+    }
+
     private string diagnosticReportStatusText = "NO REPORT";
     public string DiagnosticReportStatusText
     {
@@ -281,6 +288,7 @@ public class DashboardViewModel : BaseViewModel
         if (report == null)
         {
             DiagnosticReportScoreText = "-- / 100";
+            DiagnosticReportProgressValue = 0;
             DiagnosticReportStatusText = "NO REPORT";
             DiagnosticReportStatusBrush = Brushes.Gray;
             DiagnosticReportSummaryText = "No diagnostic report generated yet.";
@@ -293,6 +301,7 @@ public class DashboardViewModel : BaseViewModel
         }
 
         DiagnosticReportScoreText = $"{report.HealthScore} / 100";
+        DiagnosticReportProgressValue = report.HealthScore;
         DiagnosticReportStatusText = report.Status;
         DiagnosticReportStatusBrush = GetHealthStatusBrush(report.Status);
         DiagnosticReportSummaryText = report.Summary;
